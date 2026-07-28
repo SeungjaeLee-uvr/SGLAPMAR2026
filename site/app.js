@@ -17,44 +17,12 @@ const overviewGrid = document.getElementById("overviewGrid");
 const imageDialog = document.getElementById("imageDialog");
 const zoomedImage = document.getElementById("zoomedImage");
 const closeImageButton = document.getElementById("closeImageButton");
-const timerButton = document.getElementById("timerButton");
-const timerText = document.getElementById("timerText");
 
 let currentIndex = 0;
 let touchStartX = 0;
-let timerRunning = false;
-let elapsedSeconds = 0;
-let timerHandle = null;
 
 function twoDigits(value) {
   return String(value).padStart(2, "0");
-}
-
-function updateTimer() {
-  const minutes = Math.floor(elapsedSeconds / 60);
-  const seconds = elapsedSeconds % 60;
-  timerText.textContent = `${twoDigits(minutes)}:${twoDigits(seconds)} / 10:00`;
-  timerButton.classList.toggle("is-running", timerRunning);
-}
-
-function toggleTimer() {
-  timerRunning = !timerRunning;
-  if (timerRunning) {
-    timerHandle = window.setInterval(() => {
-      elapsedSeconds += 1;
-      updateTimer();
-    }, 1000);
-  } else {
-    window.clearInterval(timerHandle);
-  }
-  updateTimer();
-}
-
-function resetTimer() {
-  timerRunning = false;
-  elapsedSeconds = 0;
-  window.clearInterval(timerHandle);
-  updateTimer();
 }
 
 function updateNotes() {
@@ -135,8 +103,6 @@ notesButton.addEventListener("click", toggleNotes);
 closeNotesButton.addEventListener("click", closeNotes);
 overviewButton.addEventListener("click", () => overviewDialog.showModal());
 closeOverviewButton.addEventListener("click", () => overviewDialog.close());
-timerButton.addEventListener("click", toggleTimer);
-timerButton.addEventListener("dblclick", resetTimer);
 
 document.querySelectorAll("[data-zoom]").forEach((image) => {
   image.addEventListener("click", () => {
@@ -173,9 +139,6 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key.toLowerCase() === "n") {
     event.preventDefault();
     toggleNotes();
-  } else if (event.key.toLowerCase() === "t") {
-    event.preventDefault();
-    toggleTimer();
   } else if (event.key === "Escape") {
     closeNotes();
   }
@@ -201,4 +164,3 @@ window.addEventListener("hashchange", () => {
 
 const hashIndex = slides.findIndex((slide) => `#${slide.id}` === window.location.hash);
 setSlide(hashIndex >= 0 ? hashIndex : 0, { skipHash: hashIndex >= 0 });
-updateTimer();
