@@ -9,6 +9,12 @@
     />
     <meta name="theme-color" content="#101418" />
     <title>Incremental Snapshot Management for XR Scene Graphs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -37,7 +43,6 @@
         class="slide slide-hero is-active"
         data-title="Opening"
         data-duration="0:30"
-        style="--hero-image: url('./assets/hero-temporal-scene.png')"
       >
         <div class="hero-panel">
           <p class="eyebrow">APMAR 2026 · 10-minute talk</p>
@@ -48,6 +53,13 @@
             <span>KAIST UVR Lab · Augmented Reality Research Center</span>
           </div>
         </div>
+        <figure class="hero-plate" aria-label="Temporal scene graph visualization">
+          <img src="./assets/hero-temporal-scene.png" alt="An XR research room with scene graph nodes and edges anchored to physical objects" />
+          <figcaption>
+            <span>Figure 01 · Temporal scene graph</span>
+            <span>Accepted changes → reconstructed history</span>
+          </figcaption>
+        </figure>
         <aside class="speaker-notes">
           <p>Good morning. I am Seungjae Lee from KAIST UVR Lab. This work asks a simple systems question: once an AR or VR runtime already produces scene graphs, how can we keep their history without storing every full state?</p>
           <p>We present an incremental snapshot manager that records only accepted changes and reconstructs temporal scene states offline. The central idea is straightforward: keep the real-time loop small, preserve explicit transitions, and give later applications access to more than the latest graph.</p>

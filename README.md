@@ -20,3 +20,9 @@ https://seungjaelee-uvr.github.io/SGLAPMAR2026/
 The site supports keyboard and touch navigation, slide overview, speaker notes, image enlargement, and a ten-minute timer.
 
 GitHub Actions publishes the contents of `site/` to GitHub Pages whenever `main` changes.
+
+## Design
+
+The presentation adapts the Cobalt Grid visual system from
+[beautiful-html-templates](https://github.com/zarazhangrui/beautiful-html-templates).
+See `THIRD_PARTY_NOTICES.md` for license details.
