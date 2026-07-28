@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A 10-minute presentation on incremental snapshot management for real-time spatial scene graphs in AR and VR."
+    />
+    <meta name="theme-color" content="#101418" />
+    <title>Incremental Snapshot Management for XR Scene Graphs</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="progress-track" aria-hidden="true">
+      <div id="progressBar" class="progress-bar"></div>
+    </div>
+
+    <header class="deck-chrome">
+      <a class="deck-mark" href="#slide-1" aria-label="Go to title slide">
+        <span class="mark-dot"></span>
+        <span>TSG HISTORY</span>
+      </a>
+
+      <div class="chrome-center">
+        <button id="timerButton" class="timer-button" type="button" title="Start or pause timer">
+          <span aria-hidden="true">◷</span>
+          <span id="timerText">00:00 / 10:00</span>
+        </button>
+      </div>
+
+      <div class="chrome-actions">
+        <a
+          class="icon-button"
+          href="https://github.com/SeungjaeLee-uvr/SGLAPMAR2026"
+          target="_blank"
+          rel="noreferrer"
+          title="Open repository"
+          aria-label="Open repository"
+        >↗</a>
+        <button id="overviewButton" class="icon-button" type="button" title="Slide overview" aria-label="Slide overview">▦</button>
+        <button id="notesButton" class="icon-button" type="button" title="Speaker notes" aria-label="Speaker notes">◫</button>
+      </div>
+    </header>
+
+    <main id="deck" class="deck">
+      <section
+        id="slide-1"
+        class="slide slide-hero is-active"
+        data-title="Opening"
+        data-duration="0:30"
+        style="--hero-image: url('./assets/teaser.png')"
+      >
+        <div class="hero-panel">
+          <p class="eyebrow">APMAR 2026 · 10-minute talk</p>
+          <h1>Incremental Snapshot Management for Real-Time Spatial Scene Graphs in AR and VR</h1>
+          <p class="hero-thesis">Keep the changes. Recover the history.</p>
+          <div class="author-block">
+            <strong>Seungjae Lee · Woontack Woo</strong>
+            <span>KAIST UVR Lab · Augmented Reality Research Center</span>
+          </div>
+        </div>
+        <div class="hero-kicker" aria-hidden="true">
+          <span>Latest state</span>
+          <span class="kicker-arrow">→</span>
+          <span class="accent-green">Temporal access</span>
+        </div>
+        <aside class="speaker-notes">
+          <p>Good morning. I am Seungjae Lee from KAIST UVR Lab. This work asks a simple systems question: once an AR or VR runtime already produces scene graphs, how can we keep their history without storing every full state?</p>
+          <p>We present an incremental snapshot manager that records only accepted changes and reconstructs temporal scene states offline. The central idea is straightforward: keep the real-time loop small, preserve explicit transitions, and give later applications access to more than the latest graph.</p>
+        </aside>
+      </section>
+
+      <section id="slide-2" class="slide" data-title="The missing history" data-duration="0:50">
+        <div class="slide-heading">
+          <p class="eyebrow">01 · Motivation</p>
+          <h2>The latest graph is useful.<br />The missing history is the problem.</h2>
+        </div>
+        <div class="problem-layout">
+          <div class="problem-copy">
+            <p class="lead">A conventional XR runtime overwrites yesterday's scene with today's state.</p>
+            <div class="question-stack">
+              <div><span>Restore</span><strong>What did the scene look like?</strong></div>
+              <div><span>Replay</span><strong>Which transition happened first?</strong></div>
+              <div><span>Compare</span><strong>What changed between two moments?</strong></div>
+              <div><span>Query</span><strong>When did a relation appear?</strong></div>
+            </div>
+          </div>
+          <figure class="paper-figure figure-frame">
+            <img src="./assets/teaser.png" alt="Comparison between latest-state-only storage and accepted snapshot history" data-zoom />
+            <figcaption>Current-state rendering and temporal access serve different consumers.</figcaption>
+          </figure>
+        </div>
+        <aside class="speaker-notes">
+          <p>Scene graphs are already common representations for objects, anchors, users, zones, and their relations. For immediate rendering, the newest graph may be enough. But the moment we ask to restore, replay, compare, debug, or query the past, the latest state is no longer sufficient.</p>
+          <p>Storing every complete graph solves the access problem, but repeats unchanged content and still forces each downstream tool to infer transitions. Our goal is to preserve those transitions once, in a form that multiple XR applications can reuse.</p>
+        </aside>
+      </section>
+
+      <section id="slide-3" class="slide" data-title="System boundary" data-duration="0:50">
+        <div class="slide-heading compact">
+          <p class="eyebrow">02 · Scope</p>
+          <h2>A narrow layer after scene understanding</h2>
+          <p class="subtitle">The manager consumes complete, renderer-independent graphs with stable identities.</p>
+        </div>
+        <div class="scope-flow" aria-label="System boundary">
+          <div class="scope-stage upstream">
+            <span class="stage-number">Upstream</span>
+            <h3>Scene production</h3>
+            <p>Tracking · Mapping · Simulation · Authoring</p>
+            <div class="scope-state">
+              <i class="node blue"></i><i class="node green"></i><i class="node orange"></i><i class="node violet"></i>
+              <span class="edge e1"></span><span class="edge e2"></span><span class="edge e3"></span>
+            </div>
+          </div>
+          <div class="scope-connector" aria-hidden="true">→</div>
+          <div class="scope-stage proposed">
+            <span class="stage-number">This work</span>
+            <h3>Snapshot management</h3>
+            <p>Filter · Diff · Append · Reconstruct</p>
+            <div class="operation-row">
+              <code>update_node</code><code>add_edge</code><code>remove_node</code>
+            </div>
+          </div>
+          <div class="scope-connector" aria-hidden="true">→</div>
+          <div class="scope-stage downstream">
+            <span class="stage-number">Downstream</span>
+            <h3>Temporal products</h3>
+            <p>Restore · Replay · Compare · Query</p>
+            <div class="history-dots"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+        <div class="boundary-band">
+          <div>
+            <span class="check">✓</span>
+            <p><strong>Assumes</strong> complete graph states and identity continuity</p>
+          </div>
+          <div>
+            <span class="cross">×</span>
+            <p><strong>Does not perform</strong> tracking, mapping, or graph construction</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">
+          <p>Our scope is intentionally narrow. We do not introduce a new tracking, mapping, or scene-understanding algorithm. We assume an upstream runtime, shared-space service, simulation, or authoring tool supplies complete scene graphs.</p>
+          <p>Two assumptions matter. First, node identities should remain stable within one history, so a moved object is patched rather than removed and re-added. Second, edge identity is derived from source, relation type, and target.</p>
+          <p>Given that interface, the manager decides which graph states to preserve and exposes explicit histories to downstream tools. This separation allows the producer and the temporal consumers to evolve independently.</p>
+        </aside>
+      </section>
+
+      <section id="slide-4" class="slide" data-title="Online and offline paths" data-duration="0:50">
+        <div class="slide-heading compact">
+          <p class="eyebrow">03 · Architecture</p>
+          <h2>Bounded online work. Heavy temporal work offline.</h2>
+        </div>
+        <figure class="paper-figure architecture-figure">
+          <img src="./assets/architecture.png" alt="Online and offline architecture of the temporal scene manager" data-zoom />
+        </figure>
+        <div class="architecture-caption">
+          <div><strong class="accent-green">Online</strong><span>Filter unchanged states, compute node and edge differences, append JSONL.</span></div>
+          <div><strong class="accent-blue">Offline</strong><span>Validate order, group records, reconstruct states, produce temporal outputs.</span></div>
+        </div>
+        <aside class="speaker-notes">
+          <p>The architecture separates a bounded online path from a heavier offline path. Online, Unity canonicalizes each complete graph and compares it with the last accepted state. If nothing changed, the sample is skipped. Otherwise, the recorder computes node- and edge-level differences and appends operation records to a JSON Lines file.</p>
+          <p>Offline, the Python materializer loads the external initial scene, validates sequence order, groups operations by accepted snapshot boundary, and reconstructs graph states. It then produces transition replay, aggregate comparison, and final-state outputs. This keeps long-history work away from the real-time XR loop.</p>
+        </aside>
+      </section>
+
+      <section id="slide-5" class="slide" data-title="Incremental transition model" data-duration="0:45">
+        <div class="slide-heading compact">
+          <p class="eyebrow">04 · Representation</p>
+          <h2>A log line is an operation. A group is a transition.</h2>
+        </div>
+        <div class="transition-layout">
+          <figure class="paper-figure transition-figure">
+            <img src="./assets/transitions.png" alt="Accepted transition groups between an external initial scene and reconstructed states" data-zoom />
+          </figure>
+          <div class="operation-legend" aria-label="Supported operations">
+            <div><span class="op add">+</span><code>add_node</code></div>
+            <div><span class="op update">~</span><code>update_node</code></div>
+            <div><span class="op remove">−</span><code>remove_node</code></div>
+            <div><span class="op add">+</span><code>add_edge</code></div>
+            <div><span class="op remove">−</span><code>remove_edge</code></div>
+          </div>
+        </div>
+        <p class="statement-band">Multiple records share one <code>snapshot_id</code> and together produce the next accepted state.</p>
+        <aside class="speaker-notes">
+          <p>Each history starts from an externally supplied initial scene, G zero. Every accepted transition is represented by one or more operation records. The prototype supports five operations: update, add, or remove a node, and add or remove an edge.</p>
+          <p>Node updates are sparse property patches, so unchanged fields are not treated as authoritative. Records from the same capture share a snapshot identifier and timestamp. This distinction is important: one JSONL line is not a scene state. The complete transition group is the accepted boundary that produces the next state.</p>
+        </aside>
+      </section>
+
+      <section id="slide-6" class="slide" data-title="Unity snapshot recorder" data-duration="0:50">
+        <div class="slide-heading compact">
+          <p class="eyebrow">05 · Online prototype</p>
+          <h2>Unity accepts change, not every capture attempt</h2>
+        </div>
+        <div class="prototype-grid">
+          <section class="prototype-step unity-step">
+            <span class="step-label">1 · Extract</span>
+            <h3>Complete graph state</h3>
+            <p><code>SceneGraphExtractor</code> reads stable node identities, transform properties, and current relations from the Unity scene.</p>
+            <div class="mini-metrics"><span>Nodes</span><span>Edges</span><span>Transforms</span></div>
+          </section>
+          <section class="prototype-step signature-step">
+            <span class="step-label">2 · Filter</span>
+            <h3>Deterministic signature</h3>
+            <p>Sorted node properties and edge identities form a canonical signature. Matching signatures are rejected immediately.</p>
+            <div class="signature-compare"><code>sig(G<sub>t</sub>)</code><b>=</b><code>sig(G<sub>last</sub>)</code><strong>SKIP</strong></div>
+          </section>
+          <section class="prototype-step diff-step">
+            <span class="step-label">3 · Accept</span>
+            <h3>Diff and append</h3>
+            <p>The accepted graph is compared with the previous accepted state. Completed node and edge operations are appended immediately.</p>
+            <div class="mini-metrics"><span>update_node</span><span>add_edge</span><span>remove_edge</span></div>
+          </section>
+        </div>
+        <div class="acceptance-strip">
+          <span>Capture attempts</span><strong>→</strong><span class="muted-state">unchanged</span><strong>→</strong><b>skip</b>
+          <i></i>
+          <span>Capture attempts</span><strong>→</strong><span class="changed-state">changed</span><strong>→</strong><b>accept + append</b>
+        </div>
+        <aside class="speaker-notes">
+          <p>The Unity recorder has three bounded steps. First, it extracts a complete graph with stable identities, transforms, and relations. Second, it builds a deterministic signature from sorted node properties and edge identities. If that signature matches the last accepted graph, the attempt is skipped.</p>
+          <p>When the graph changed, the recorder computes a sparse diff against the previous accepted state. It appends completed node and edge operations immediately, then advances the accepted boundary. The configured capture rate is therefore a maximum observation rate, not a guarantee that every attempt becomes history.</p>
+        </aside>
+      </section>
+
+      <section id="slide-7" class="slide" data-title="Durable log and materializer" data-duration="0:40">
+        <div class="slide-heading compact">
+          <p class="eyebrow">06 · Offline prototype</p>
+          <h2>Append first. Reconstruct and replay later.</h2>
+        </div>
+        <div class="prototype-grid two-up">
+          <section class="prototype-step log-step">
+            <span class="step-label">Append-only JSONL</span>
+            <h3>One durable operation per line</h3>
+            <pre><code>{"seq":42,
+"snapshot_id":"snapshot_0017",
+"op":"update_node",
+"node_id":"orb",
+"changed_properties":["position"]}</code></pre>
+          </section>
+          <section class="prototype-step python-step">
+            <span class="step-label">Python 3</span>
+            <h3>History materializer</h3>
+            <div class="process-list">
+              <span>Validate sequence order</span>
+              <span>Ignore an incomplete final record</span>
+              <span>Group operations by accepted boundary</span>
+              <span>Apply sparse patches from the initial scene</span>
+            </div>
+            <div class="file-stack"><code>snapshot_playback.json</code><code>snapshot_final_scene.json</code><code>snapshot_aggregate_diff.json</code></div>
+          </section>
+        </div>
+        <div class="reliability-strip">
+          <span>Offline processing stays out of the Unity main loop</span>
+          <i></i>
+          <span>Unity replays materialized diffs as GameObject updates</span>
+          <i></i>
+          <span>Downstream tools reuse one explicit transition history</span>
+        </div>
+        <aside class="speaker-notes">
+          <p>The durable interface is append-only JSONL. Because each completed operation is written as one line, a recording remains readable during production and the materializer can ignore an incomplete final line after an interruption.</p>
+          <p>Offline, the Python tool checks ordering, groups operations by snapshot identifier, applies sparse patches from the external initial scene, and exports playback, aggregate difference, and final-state documents. Unity can then replay the materialized transitions as GameObject updates, while other consumers can reuse the same history.</p>
+        </aside>
+      </section>
+
+      <section id="slide-8" class="slide" data-title="Evaluation design" data-duration="0:50">
+        <div class="slide-heading compact">
+          <p class="eyebrow">07 · Study design</p>
+          <h2>Four temporal patterns, then four capture rates</h2>
+        </div>
+        <div class="study-layout">
+          <div class="workload-table" role="table" aria-label="Controlled workloads">
+            <div class="workload-row header" role="row"><span>Workload</span><span>Duration</span><span>Change pattern</span></div>
+            <div class="workload-row" role="row"><strong>ShortSparse</strong><span>18 s</span><span>Single-object motion + holds</span></div>
+            <div class="workload-row" role="row"><strong>MediumStaggered</strong><span>30 s</span><span>Alternating single and paired motion</span></div>
+            <div class="workload-row" role="row"><strong>LongComplex</strong><span>54 s</span><span>Longer mixed motion + holds</span></div>
+            <div class="workload-row dense" role="row"><strong>OriginalChoreography</strong><span>24 s</span><span>All objects continuously active</span></div>
+          </div>
+          <div class="study-summary">
+            <div class="large-number"><strong>126</strong><span>seconds total</span></div>
+            <div class="large-number"><strong>7</strong><span>nodes at each initial scene</span></div>
+            <div class="large-number"><strong>80</strong><span>factorial runs</span></div>
+            <div class="factorial">
+              <span>4 workloads</span><b>×</b><span>4 rates</span><b>×</b><span>5 repetitions</span>
+            </div>
+          </div>
+        </div>
+        <div class="rate-row">
+          <span>Capture-rate sensitivity</span>
+          <strong>10</strong><i></i><strong>30</strong><i></i><strong>60</strong><i></i><strong>120 CPM</strong>
+        </div>
+        <aside class="speaker-notes">
+          <p>We first evaluate four controlled Unity workloads. They total 126 seconds and begin from seven-node scenes. Short Sparse isolates brief object motions with unchanged windows. Medium Staggered alternates single and paired motion. Long Complex extends this structure. Original Choreography keeps all objects active and creates the densest history.</p>
+          <p>We also run a randomized four-by-four-by-five factorial study: four workloads, rates from 10 to 120 captures per minute, and five repetitions, for 80 runs. Every run ends with a forced changed-state capture so endpoint accuracy can be tested separately from intermediate sampling density.</p>
+        </aside>
+      </section>
+
+      <section id="slide-9" class="slide" data-title="Reconstruction and latency" data-duration="0:45">
+        <div class="slide-heading compact">
+          <p class="eyebrow">08 · Reliability</p>
+          <h2>Every controlled history reaches the correct final graph</h2>
+        </div>
+        <div class="result-hero">
+          <div><strong>61</strong><span>accepted transition groups</span></div>
+          <div><strong>155</strong><span>node and edge operations</span></div>
+          <div><strong>&lt; 7.2 ms</strong><span>mean offline restore</span></div>
+          <div class="success-result"><strong>4 / 4</strong><span>final scenes reconstructed</span></div>
+        </div>
+        <div class="accuracy-band">
+          <div><strong>135</strong><span>sparse node updates</span></div>
+          <div><strong>20</strong><span>edge additions or removals</span></div>
+          <div><strong>13 / 13</strong><span>snapshot regression tests pass</span></div>
+        </div>
+        <p class="statement-band">The prototype preserves accepted transition order and reconstructs the same final graph as the Unity ground truth.</p>
+        <aside class="speaker-notes">
+          <p>Across 67 nominal observation opportunities, the system records 61 accepted transition groups, skips six unchanged opportunities, and stores 155 operations. These include 135 node updates and 20 edge additions or removals.</p>
+          <p>The materializer reconstructs all four final scenes, and all 13 snapshot-management regression tests pass. Mean end-to-end restore stays below 7.2 milliseconds for these small histories. This establishes internal consistency across filtering, grouping, reconstruction, and replay, rather than large-scale deployment performance.</p>
+        </aside>
+      </section>
+
+      <section id="slide-10" class="slide" data-title="Storage trade-off" data-duration="1:00">
+        <div class="slide-heading compact">
+          <p class="eyebrow">09 · Storage</p>
+          <h2>Incremental history is compact only when change is sparse</h2>
+        </div>
+        <div class="storage-layout">
+          <div class="storage-chart" role="img" aria-label="Incremental log to full-state storage ratio by workload">
+            <div class="chart-title"><strong>JSONL bytes / reconstructed full-state bytes</strong><span>Lower than 1.0 means smaller</span></div>
+            <div class="bar-row"><span>Short</span><div class="bar-track"><i style="width:27.4%"></i><b class="baseline"></b></div><strong>0.46×</strong></div>
+            <div class="bar-row"><span>Medium</span><div class="bar-track"><i style="width:38.7%"></i><b class="baseline"></b></div><strong>0.65×</strong></div>
+            <div class="bar-row"><span>Long</span><div class="bar-track"><i style="width:39.9%"></i><b class="baseline"></b></div><strong>0.67×</strong></div>
+            <div class="bar-row dense-bar"><span>Dense</span><div class="bar-track"><i style="width:100%"></i><b class="baseline"></b></div><strong>1.68×</strong></div>
+          </div>
+          <div class="result-explanation">
+            <p class="aggregate-ratio"><strong>0.86×</strong><span>aggregate ratio</span></p>
+            <p><strong>Why does the dense workload cross 1.0?</strong></p>
+            <p>Readable operation records repeat sequence metadata, identifiers, timestamps, operation names, and JSON field names.</p>
+            <p class="result-conclusion">Sparsity amortizes that overhead. Continuous change does not.</p>
+          </div>
+        </div>
+        <div class="density-rule">
+          <span>Sparse scene</span><strong>Incremental JSONL</strong><i></i><span>Dense scene</span><strong>Checkpoint or hybrid encoding</strong>
+        </div>
+        <aside class="speaker-notes">
+          <p>Storage is the conditional result. Sparse workloads use 0.46 to 0.67 times the bytes of compact reconstructed full states. Across all four workloads, the aggregate ratio is 0.86. But the continuously changing choreography uses 1.68 times as many bytes.</p>
+          <p>The reason is transparent JSON overhead. Every operation repeats sequence metadata, identifiers, timestamps, operation names, and field names. Sparse changes amortize this cost; dense changes do not. Highly dynamic scenes may therefore favor periodic full snapshots, hybrid checkpoints, or grouped binary encodings.</p>
+        </aside>
+      </section>
+
+      <section id="slide-11" class="slide" data-title="Capture-rate trade-off" data-duration="1:00">
+        <div class="slide-heading compact">
+          <p class="eyebrow">10 · Sensitivity</p>
+          <h2>Higher capture rates preserve more of the path, not a better endpoint</h2>
+        </div>
+        <div class="cpm-layout">
+          <div class="cpm-chart" role="img" aria-label="Accepted groups and log size increase with capture rate">
+            <div class="cpm-legend"><span><i class="accepted-key"></i>Accepted groups</span><span><i class="bytes-key"></i>Log size (KB)</span></div>
+            <div class="cpm-columns">
+              <div class="cpm-column">
+                <div class="bar-pair"><i class="accepted" style="height:12%"><b>6.3</b></i><i class="bytes" style="height:15%"><b>12.8</b></i></div><span>10 CPM</span>
+              </div>
+              <div class="cpm-column">
+                <div class="bar-pair"><i class="accepted" style="height:29%"><b>15.3</b></i><i class="bytes" style="height:31%"><b>26.6</b></i></div><span>30 CPM</span>
+              </div>
+              <div class="cpm-column">
+                <div class="bar-pair"><i class="accepted" style="height:53%"><b>27.5</b></i><i class="bytes" style="height:53%"><b>45.6</b></i></div><span>60 CPM</span>
+              </div>
+              <div class="cpm-column">
+                <div class="bar-pair"><i class="accepted" style="height:100%"><b>52.2</b></i><i class="bytes" style="height:100%"><b>85.3</b></i></div><span>120 CPM</span>
+              </div>
+            </div>
+          </div>
+          <div class="endpoint-panel">
+            <span class="endpoint-check">✓</span>
+            <strong>80 / 80</strong>
+            <h3>Final graph recovered</h3>
+            <p>Position RMSE: <b>0</b></p>
+            <p>Final relation recall: <b>100%</b></p>
+            <hr />
+            <p class="endpoint-note">Mean relation operations rose from <b>4.35</b> to <b>7.45</b>, exposing more transient changes.</p>
+          </div>
+        </div>
+        <aside class="speaker-notes">
+          <p>Increasing capture rate changes how much intermediate structure is retained. From 10 to 120 captures per minute, accepted groups per run increase from 6.25 to 52.2, while mean log size grows from 12.8 to 85.3 kilobytes. More unchanged attempts are also filtered at higher rates.</p>
+          <p>The number of recorded relation operations rises from 4.35 to 7.45 on average, showing that finer sampling can expose transient relations that coarse sampling misses. Yet all 80 runs recover the final graph, with zero position error and 100 percent final relation recall. In these controlled runs, capture rate buys temporal resolution, not a more correct endpoint.</p>
+        </aside>
+      </section>
+
+      <section id="slide-12" class="slide slide-closing" data-title="Takeaway" data-duration="1:10">
+        <div class="closing-grid">
+          <div class="closing-main">
+            <p class="eyebrow">11 · Takeaway</p>
+            <h2>Incremental history is a practical interface — and a conditional storage win.</h2>
+            <p class="closing-thesis">Preserve accepted transitions when change is sparse. Switch strategy when the scene becomes dense.</p>
+            <div class="closing-actions">
+              <a href="https://github.com/SeungjaeLee-uvr/SGLAPMAR2026" target="_blank" rel="noreferrer">Repository ↗</a>
+              <a href="./lsj_apmar.pdf" target="_blank">Paper ↗</a>
+              <a href="./script.md" target="_blank">Full script ↗</a>
+            </div>
+          </div>
+          <div class="closing-side">
+            <h3>What this establishes</h3>
+            <ul>
+              <li>Scene production and temporal access can be separated by a small graph-state interface.</li>
+              <li>Explicit transitions support restore, replay, comparison, and query without repeated full-state diffing.</li>
+              <li>Capture rate should follow the temporal questions an application needs to answer.</li>
+            </ul>
+            <h3>What comes next</h3>
+            <p>Deployed traces · periodic checkpoints · transactional groups · multi-writer ordering · scalable encodings</p>
+          </div>
+        </div>
+        <div class="closing-footer">
+          <span>Thank you.</span>
+          <strong>Questions?</strong>
+        </div>
+        <aside class="speaker-notes">
+          <p>To conclude, this work contributes a narrow systems layer between real-time scene production and offline temporal access. It filters unchanged states, records explicit node and edge operations, reconstructs accepted histories, and supports restore, replay, comparison, and query.</p>
+          <p>The main lesson is conditional. Incremental JSONL is compact and transparent when changes are sparse, but dense scenes can favor periodic full snapshots, hybrid checkpoints, or grouped binary encodings. The current study is controlled and assumes stable identities, one ordered writer, and small histories. Our next steps are deployed XR traces, transactional transition boundaries, checkpoints, multi-producer ordering, and stronger indexing.</p>
+          <p>In short, we do not make the final scene graph smarter. We make its history available. Thank you, and I welcome your questions.</p>
+        </aside>
+      </section>
+    </main>
+
+    <nav id="slideRail" class="slide-rail" aria-label="Slide navigation"></nav>
+
+    <footer class="deck-footer">
+      <div id="slideCounter" class="slide-counter">01 / 12</div>
+      <div id="slideMeta" class="slide-meta">Opening · 0:30</div>
+      <div class="nav-buttons">
+        <button id="prevButton" class="icon-button" type="button" title="Previous slide" aria-label="Previous slide">‹</button>
+        <button id="nextButton" class="icon-button" type="button" title="Next slide" aria-label="Next slide">›</button>
+      </div>
+    </footer>
+
+    <aside id="notesDrawer" class="notes-drawer" aria-hidden="true">
+      <div class="notes-header">
+        <div>
+          <span class="notes-label">Speaker notes</span>
+          <strong id="notesTitle">Opening</strong>
+        </div>
+        <button id="closeNotesButton" class="icon-button" type="button" title="Close notes" aria-label="Close notes">×</button>
+      </div>
+      <div id="notesContent" class="notes-content"></div>
+    </aside>
+
+    <dialog id="overviewDialog" class="overview-dialog">
+      <div class="dialog-header">
+        <div><span class="notes-label">10-minute talk</span><h2>Slide overview</h2></div>
+        <button id="closeOverviewButton" class="icon-button" type="button" title="Close overview" aria-label="Close overview">×</button>
+      </div>
+      <div id="overviewGrid" class="overview-grid"></div>
+      <div class="dialog-actions">
+        <a href="./script.md" target="_blank" class="wide-action">Open the complete presentation script ↗</a>
+      </div>
+    </dialog>
+
+    <dialog id="imageDialog" class="image-dialog">
+      <button id="closeImageButton" class="icon-button image-close" type="button" title="Close image" aria-label="Close image">×</button>
+      <img id="zoomedImage" alt="" />
+    </dialog>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
