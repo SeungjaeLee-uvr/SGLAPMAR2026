@@ -2131,6 +2131,10 @@ body:has(.slide-hero.is-active) .deck-footer {
   color: var(--ink);
 }
 
+.step-label {
+  color: #ffffff;
+}
+
 .paper-figure,
 .figure-frame {
   border: 1.5px solid var(--ink);
