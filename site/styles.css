@@ -2904,6 +2904,70 @@ body:has(.slide-hero.is-active) .deck-footer {
   line-height: 1.45;
 }
 
+.discussion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.discussion-point {
+  min-height: 270px;
+  padding: 24px;
+  border: 1.5px solid var(--ink);
+  background: rgba(248, 245, 234, 0.88);
+}
+
+.discussion-label {
+  display: inline-block;
+  padding: 6px 9px;
+  color: #ffffff;
+  background: var(--ink);
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.discussion-point h3 {
+  margin: 24px 0 14px;
+  font-size: 1.6rem;
+  line-height: 1.08;
+}
+
+.discussion-point p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.discussion-boundary {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  border: 1.5px solid var(--ink);
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.discussion-boundary span,
+.discussion-boundary strong {
+  padding: 15px 20px;
+}
+
+.discussion-boundary span {
+  border-right: 1px solid rgba(240, 235, 222, 0.3);
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.discussion-boundary strong {
+  font-weight: 500;
+  text-align: center;
+}
+
 @media (min-width: 1600px) and (min-height: 900px) {
   .hero-logos {
     gap: 26px;
@@ -2932,5 +2996,24 @@ body:has(.slide-hero.is-active) .deck-footer {
 
   .closing-qr figcaption strong {
     font-size: 1.5rem;
+  }
+
+  .discussion-grid {
+    gap: 22px;
+  }
+
+  .discussion-point {
+    min-height: 330px;
+    padding: 30px;
+  }
+
+  .discussion-point h3 {
+    margin-top: 30px;
+    font-size: 1.75rem;
+  }
+
+  .discussion-boundary span,
+  .discussion-boundary strong {
+    padding: 18px 24px;
   }
 }

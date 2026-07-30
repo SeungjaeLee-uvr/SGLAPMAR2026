@@ -44,7 +44,7 @@ The durable interface is append-only JSONL. Because each completed operation is 
 
 Offline, the Python tool checks ordering, groups operations by snapshot identifier, applies sparse patches from the external initial scene, and exports playback, aggregate difference, and final-state documents. Unity can then replay the materialized transitions as GameObject updates, while other consumers can reuse the same history.
 
-## Slide 8 - Evaluation Design (0:35)
+## Slide 8 - Evaluation Design (0:30)
 
 We evaluate four controlled Unity workloads totaling 126 seconds. Short Sparse isolates brief motion and unchanged windows. Medium Staggered alternates single and paired motion. Long Complex extends that pattern, while Original Choreography keeps every object active and produces the densest history.
 
@@ -68,22 +68,26 @@ Across 67 nominal observation opportunities, the system records 61 accepted tran
 
 Mean end-to-end restore stays below 7.2 milliseconds for these small histories. This establishes internal consistency across filtering, grouping, reconstruction, and replay, rather than large-scale deployment performance.
 
-## Slide 12 - Storage Trade-off (0:50)
+## Slide 12 - Storage Trade-off (0:45)
 
 Storage is the conditional result. Sparse workloads use 0.46 to 0.67 times the bytes of compact reconstructed full states. Across all four workloads, the aggregate ratio is 0.86. But the continuously changing choreography uses 1.68 times as many bytes.
 
 The reason is transparent JSON overhead. Every operation repeats sequence metadata, identifiers, timestamps, operation names, and field names. Sparse changes amortize this cost; dense changes do not. Highly dynamic scenes may therefore favor periodic full snapshots, hybrid checkpoints, or grouped binary encodings.
 
-## Slide 13 - Capture-Rate Trade-off (0:50)
+## Slide 13 - Capture-Rate Trade-off (0:45)
 
 Increasing capture rate changes how much intermediate structure is retained. From 10 to 120 captures per minute, accepted groups per run increase from 6.25 to 52.2, while mean log size grows from 12.8 to 85.3 kilobytes. More unchanged attempts are also filtered at higher rates.
 
 The number of recorded relation operations rises from 4.35 to 7.45 on average, showing that finer sampling can expose transient relations that coarse sampling misses. Yet all 80 runs recover the final graph, with zero position error and 100 percent final relation recall. In these controlled runs, capture rate buys temporal resolution, not a more correct endpoint.
 
-## Slide 14 - Takeaway (1:00)
+## Slide 14 - Discussion (0:30)
 
-To conclude, this work contributes a narrow systems layer between real-time scene production and offline temporal access. It filters unchanged states, records explicit node and edge operations, reconstructs accepted histories, and supports restore, replay, comparison, and query.
+These results separate three decisions. Capture rate should follow the temporal questions we need to answer, because it changes path fidelity rather than endpoint correctness. Encoding should follow scene dynamics, because dense change can erase the storage advantage.
 
-The main lesson is conditional. Incremental JSONL is compact and transparent when changes are sparse, but dense scenes can favor periodic full snapshots, hybrid checkpoints, or grouped binary encodings. The current study is controlled and assumes stable identities, one ordered writer, and small histories. Our next steps are deployed XR traces, transactional transition boundaries, checkpoints, multi-producer ordering, and stronger indexing.
+Importantly, the transition interface remains useful for replay, debugging, comparison, and query even when compression is not the main benefit. The current evidence is bounded to controlled workloads, stable identities, one ordered writer, and small histories.
 
-In short, we do not make the final scene graph smarter. We make its history available. Thank you, and I welcome your questions.
+## Slide 15 - Conclusion (0:45)
+
+To conclude, this work adds a small temporal layer between real-time scene production and offline access. It filters unchanged states, records explicit node and edge operations, reconstructs accepted histories, and supports restore, replay, comparison, and query.
+
+The lesson is conditional: incremental history is compact when change is sparse, while dense scenes may need checkpoints or grouped encodings. In short, we do not make the final scene graph smarter. We make its history available. Thank you, and I welcome your questions.

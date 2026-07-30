@@ -15,7 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css?v=20260730-4" />
+    <link rel="stylesheet" href="./styles.css?v=20260730-5" />
   </head>
   <body>
     <div class="progress-track" aria-hidden="true">
@@ -264,7 +264,7 @@
         </aside>
       </section>
 
-      <section id="slide-8" class="slide" data-title="Evaluation design" data-duration="0:35">
+      <section id="slide-8" class="slide" data-title="Evaluation design" data-duration="0:30">
         <div class="slide-heading compact">
           <p class="eyebrow">07 · Study design</p>
           <h2>Four temporal patterns, then four capture rates</h2>
@@ -370,7 +370,7 @@
         </aside>
       </section>
 
-      <section id="slide-12" class="slide" data-title="Storage trade-off" data-duration="0:50">
+      <section id="slide-12" class="slide" data-title="Storage trade-off" data-duration="0:45">
         <div class="slide-heading compact">
           <p class="eyebrow">11 · Storage</p>
           <h2>Incremental history is compact only when change is sparse</h2>
@@ -399,7 +399,7 @@
         </aside>
       </section>
 
-      <section id="slide-13" class="slide" data-title="Capture-rate trade-off" data-duration="0:50">
+      <section id="slide-13" class="slide" data-title="Capture-rate trade-off" data-duration="0:45">
         <div class="slide-heading compact">
           <p class="eyebrow">12 · Sensitivity</p>
           <h2>Higher capture rates preserve more of the path, not a better endpoint</h2>
@@ -438,10 +438,42 @@
         </aside>
       </section>
 
-      <section id="slide-14" class="slide slide-closing" data-title="Takeaway" data-duration="1:00">
+      <section id="slide-14" class="slide" data-title="Discussion" data-duration="0:30">
+        <div class="slide-heading compact">
+          <p class="eyebrow">13 · Discussion</p>
+          <h2>The right history strategy depends on the questions and the scene</h2>
+        </div>
+        <div class="discussion-grid">
+          <article class="discussion-point">
+            <span class="discussion-label">Temporal fidelity</span>
+            <h3>Capture rate preserves the path</h3>
+            <p>Higher CPM retains more intermediate transitions, but every tested rate already recovered the same endpoint.</p>
+          </article>
+          <article class="discussion-point">
+            <span class="discussion-label">Storage regime</span>
+            <h3>Sparsity determines the encoding win</h3>
+            <p>Incremental JSONL is compact for sparse change. Dense motion can favor checkpoints, grouped records, or binary encoding.</p>
+          </article>
+          <article class="discussion-point">
+            <span class="discussion-label">Interface value</span>
+            <h3>History remains useful beyond compression</h3>
+            <p>Explicit transitions still support replay, debugging, comparison, and query even when byte savings disappear.</p>
+          </article>
+        </div>
+        <div class="discussion-boundary">
+          <span>Interpretation boundary</span>
+          <strong>Controlled Unity workloads · stable identities · one ordered writer · small histories</strong>
+        </div>
+        <aside class="speaker-notes">
+          <p>These results separate three decisions. Capture rate should follow the temporal questions we need to answer, because it changes path fidelity rather than endpoint correctness. Encoding should follow scene dynamics, because dense change can erase the storage advantage.</p>
+          <p>Importantly, the transition interface remains useful for replay, debugging, comparison, and query even when compression is not the main benefit. The current evidence is bounded to controlled workloads, stable identities, one ordered writer, and small histories.</p>
+        </aside>
+      </section>
+
+      <section id="slide-15" class="slide slide-closing" data-title="Conclusion" data-duration="0:45">
         <div class="closing-grid">
           <div class="closing-main">
-            <p class="eyebrow">13 · Takeaway</p>
+            <p class="eyebrow">14 · Conclusion</p>
             <h2>Incremental history is a practical interface — and a conditional storage win.</h2>
             <p class="closing-thesis">Preserve accepted transitions when change is sparse. Switch strategy when the scene becomes dense.</p>
             <figure class="closing-qr">
@@ -468,9 +500,8 @@
           <strong>Questions?</strong>
         </div>
         <aside class="speaker-notes">
-          <p>To conclude, this work contributes a narrow systems layer between real-time scene production and offline temporal access. It filters unchanged states, records explicit node and edge operations, reconstructs accepted histories, and supports restore, replay, comparison, and query.</p>
-          <p>The main lesson is conditional. Incremental JSONL is compact and transparent when changes are sparse, but dense scenes can favor periodic full snapshots, hybrid checkpoints, or grouped binary encodings. The current study is controlled and assumes stable identities, one ordered writer, and small histories. Our next steps are deployed XR traces, transactional transition boundaries, checkpoints, multi-producer ordering, and stronger indexing.</p>
-          <p>In short, we do not make the final scene graph smarter. We make its history available. Thank you, and I welcome your questions.</p>
+          <p>To conclude, this work adds a small temporal layer between real-time scene production and offline access. It filters unchanged states, records explicit node and edge operations, reconstructs accepted histories, and supports restore, replay, comparison, and query.</p>
+          <p>The lesson is conditional: incremental history is compact when change is sparse, while dense scenes may need checkpoints or grouped encodings. In short, we do not make the final scene graph smarter. We make its history available. Thank you, and I welcome your questions.</p>
         </aside>
       </section>
     </main>
@@ -478,7 +509,7 @@
     <nav id="slideRail" class="slide-rail" aria-label="Slide navigation"></nav>
 
     <footer class="deck-footer">
-      <div id="slideCounter" class="slide-counter">01 / 14</div>
+      <div id="slideCounter" class="slide-counter">01 / 15</div>
       <div class="nav-buttons">
         <button id="prevButton" class="icon-button" type="button" title="Previous slide" aria-label="Previous slide">‹</button>
         <button id="nextButton" class="icon-button" type="button" title="Next slide" aria-label="Next slide">›</button>
