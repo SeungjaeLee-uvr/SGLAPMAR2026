@@ -44,31 +44,43 @@ The durable interface is append-only JSONL. Because each completed operation is 
 
 Offline, the Python tool checks ordering, groups operations by snapshot identifier, applies sparse patches from the external initial scene, and exports playback, aggregate difference, and final-state documents. Unity can then replay the materialized transitions as GameObject updates, while other consumers can reuse the same history.
 
-## Slide 8 - Evaluation Design (0:50)
+## Slide 8 - Evaluation Design (0:35)
 
-We first evaluate four controlled Unity workloads. They total 126 seconds and begin from seven-node scenes. Short Sparse isolates brief object motions with unchanged windows. Medium Staggered alternates single and paired motion. Long Complex extends this structure. Original Choreography keeps all objects active and creates the densest history.
+We evaluate four controlled Unity workloads totaling 126 seconds. Short Sparse isolates brief motion and unchanged windows. Medium Staggered alternates single and paired motion. Long Complex extends that pattern, while Original Choreography keeps every object active and produces the densest history.
 
-We also run a randomized four-by-four-by-five factorial study: four workloads, rates from 10 to 120 captures per minute, and five repetitions, for 80 runs. Every run ends with a forced changed-state capture so endpoint accuracy can be tested separately from intermediate sampling density.
+We then run a randomized four-by-four-by-five factorial study: four workloads, rates from 10 to 120 captures per minute, and five repetitions, for 80 runs. A final changed-state capture lets us test endpoint accuracy separately from intermediate sampling density.
 
-## Slide 9 - Reconstruction and Latency (0:45)
+## Slide 9 - Unity Experiment Harness (0:25)
+
+The factorial study runs directly in Unity. The controlled scene provides a shared starting state, while the in-engine controller configures four workloads, four capture rates, and five repetitions.
+
+A fixed seed makes the randomized order repeatable, and every session writes to a dedicated output directory for later materialization and analysis.
+
+## Slide 10 - Factorial Run in Motion (0:25)
+
+During execution, the overlay reports progress, run identifier, workload, capture rate, seed, and output path. These examples show the same Medium Staggered workload at 120 and 30 captures per minute.
+
+The motion program and endpoint task stay fixed. Only the observation rate changes, isolating how sampling density affects the retained path.
+
+## Slide 11 - Reconstruction and Latency (0:40)
 
 Across 67 nominal observation opportunities, the system records 61 accepted transition groups, skips six unchanged opportunities, and stores 155 operations. These include 135 node updates and 20 edge additions or removals. The materializer reconstructs all four final scenes, and all 13 snapshot-management regression tests pass.
 
 Mean end-to-end restore stays below 7.2 milliseconds for these small histories. This establishes internal consistency across filtering, grouping, reconstruction, and replay, rather than large-scale deployment performance.
 
-## Slide 10 - Storage Trade-off (1:00)
+## Slide 12 - Storage Trade-off (0:50)
 
 Storage is the conditional result. Sparse workloads use 0.46 to 0.67 times the bytes of compact reconstructed full states. Across all four workloads, the aggregate ratio is 0.86. But the continuously changing choreography uses 1.68 times as many bytes.
 
 The reason is transparent JSON overhead. Every operation repeats sequence metadata, identifiers, timestamps, operation names, and field names. Sparse changes amortize this cost; dense changes do not. Highly dynamic scenes may therefore favor periodic full snapshots, hybrid checkpoints, or grouped binary encodings.
 
-## Slide 11 - Capture-Rate Trade-off (1:00)
+## Slide 13 - Capture-Rate Trade-off (0:50)
 
 Increasing capture rate changes how much intermediate structure is retained. From 10 to 120 captures per minute, accepted groups per run increase from 6.25 to 52.2, while mean log size grows from 12.8 to 85.3 kilobytes. More unchanged attempts are also filtered at higher rates.
 
 The number of recorded relation operations rises from 4.35 to 7.45 on average, showing that finer sampling can expose transient relations that coarse sampling misses. Yet all 80 runs recover the final graph, with zero position error and 100 percent final relation recall. In these controlled runs, capture rate buys temporal resolution, not a more correct endpoint.
 
-## Slide 12 - Takeaway (1:10)
+## Slide 14 - Takeaway (1:00)
 
 To conclude, this work contributes a narrow systems layer between real-time scene production and offline temporal access. It filters unchanged states, records explicit node and edge operations, reconstructs accepted histories, and supports restore, replay, comparison, and query.
 

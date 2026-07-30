@@ -2359,47 +2359,47 @@ body:has(.slide-hero.is-active) .deck-footer {
     padding-bottom: 78px;
   }
 
-  #slide-11 {
+  #slide-13 {
     gap: 12px;
     padding-top: 66px;
     padding-bottom: 72px;
   }
 
-  #slide-11 .cpm-layout {
+  #slide-13 .cpm-layout {
     min-height: 380px;
   }
 
-  #slide-11 .cpm-chart {
+  #slide-13 .cpm-chart {
     padding: 18px 24px;
   }
 
-  #slide-11 .cpm-columns {
+  #slide-13 .cpm-columns {
     padding: 24px 18px 0;
   }
 
-  #slide-11 .bar-pair {
+  #slide-13 .bar-pair {
     height: 230px;
   }
 
-  #slide-11 .endpoint-panel {
+  #slide-13 .endpoint-panel {
     padding: 22px;
   }
 
-  #slide-11 .endpoint-check {
+  #slide-13 .endpoint-check {
     width: 48px;
     height: 48px;
   }
 
-  #slide-11 .endpoint-panel > strong {
+  #slide-13 .endpoint-panel > strong {
     margin-top: 12px;
     font-size: 2.65rem;
   }
 
-  #slide-11 .endpoint-panel h3 {
+  #slide-13 .endpoint-panel h3 {
     margin-bottom: 12px;
   }
 
-  #slide-11 .endpoint-panel hr {
+  #slide-13 .endpoint-panel hr {
     margin: 16px 0;
   }
 }
@@ -2673,52 +2673,182 @@ body:has(.slide-hero.is-active) .deck-footer {
     padding-bottom: 106px;
   }
 
-  #slide-11 {
+  #slide-13 {
     gap: 20px;
     padding-top: 86px;
     padding-bottom: 102px;
   }
 
-  #slide-11 .cpm-layout {
+  #slide-13 .cpm-layout {
     min-height: 500px;
   }
 
-  #slide-11 .cpm-chart {
+  #slide-13 .cpm-chart {
     padding: 24px 32px;
   }
 
-  #slide-11 .cpm-columns {
+  #slide-13 .cpm-columns {
     padding: 34px 24px 0;
   }
 
-  #slide-11 .bar-pair {
+  #slide-13 .bar-pair {
     height: 315px;
   }
 
-  #slide-11 .endpoint-panel {
+  #slide-13 .endpoint-panel {
     padding: 30px;
   }
 
-  #slide-11 .endpoint-check {
+  #slide-13 .endpoint-check {
     width: 58px;
     height: 58px;
   }
 
-  #slide-11 .endpoint-panel > strong {
+  #slide-13 .endpoint-panel > strong {
     margin-top: 16px;
     font-size: 3rem;
   }
 
-  #slide-11 .endpoint-panel h3 {
+  #slide-13 .endpoint-panel h3 {
     margin-bottom: 16px;
   }
 
-  #slide-11 .endpoint-panel hr {
+  #slide-13 .endpoint-panel hr {
     margin: 22px 0;
   }
 
   .deck-footer {
     bottom: 40px;
     height: 48px;
+  }
+}
+
+.slide-experiment {
+  gap: 18px;
+}
+
+.experiment-setup-grid,
+.experiment-run-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  min-height: 0;
+}
+
+.experiment-shot {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  height: min(48vh, 520px);
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1.5px solid var(--ink);
+  background: rgba(248, 245, 234, 0.88);
+}
+
+.experiment-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+  background: #6d6864;
+  cursor: zoom-in;
+}
+
+.experiment-shot figcaption {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--ink);
+  color: var(--ink);
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+}
+
+.experiment-shot figcaption strong {
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.experiment-shot figcaption span {
+  color: var(--muted);
+  text-align: right;
+}
+
+.experiment-fact-strip,
+.experiment-observation {
+  display: grid;
+  align-items: center;
+  border: 1.5px solid var(--ink);
+}
+
+.experiment-fact-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.experiment-fact-strip span {
+  padding: 13px 18px;
+  text-align: center;
+}
+
+.experiment-fact-strip span + span {
+  border-left: 1px solid rgba(240, 235, 222, 0.3);
+}
+
+.experiment-fact-strip b {
+  margin-right: 8px;
+  font-family: "DM Mono", ui-monospace, monospace;
+}
+
+.experiment-observation {
+  grid-template-columns: minmax(max-content, 0.65fr) minmax(0, 1.35fr);
+  gap: 24px;
+  padding: 14px 18px;
+  background: var(--paper-deep);
+}
+
+.experiment-observation strong {
+  font-family: "Newsreader", Georgia, serif;
+  font-size: 1.22rem;
+  font-weight: 400;
+}
+
+.experiment-observation span {
+  padding-left: 24px;
+  border-left: 1px solid var(--ink);
+}
+
+@media (min-width: 1600px) and (min-height: 900px) {
+  .slide-experiment {
+    gap: 22px;
+  }
+
+  .experiment-setup-grid,
+  .experiment-run-grid {
+    gap: 22px;
+  }
+
+  .experiment-shot {
+    height: min(50vh, 540px);
+  }
+
+  .experiment-shot figcaption {
+    min-height: 56px;
+    padding: 12px 16px;
+    font-size: 0.74rem;
+  }
+
+  .experiment-fact-strip span {
+    padding: 15px 20px;
+  }
+
+  .experiment-observation {
+    padding: 16px 22px;
   }
 }

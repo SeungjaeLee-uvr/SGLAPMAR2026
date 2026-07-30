@@ -260,7 +260,7 @@
         </aside>
       </section>
 
-      <section id="slide-8" class="slide" data-title="Evaluation design" data-duration="0:50">
+      <section id="slide-8" class="slide" data-title="Evaluation design" data-duration="0:35">
         <div class="slide-heading compact">
           <p class="eyebrow">07 · Study design</p>
           <h2>Four temporal patterns, then four capture rates</h2>
@@ -287,14 +287,65 @@
           <strong>10</strong><strong>30</strong><strong>60</strong><strong>120 CPM</strong>
         </div>
         <aside class="speaker-notes">
-          <p>We first evaluate four controlled Unity workloads. They total 126 seconds and begin from seven-node scenes. Short Sparse isolates brief object motions with unchanged windows. Medium Staggered alternates single and paired motion. Long Complex extends this structure. Original Choreography keeps all objects active and creates the densest history.</p>
-          <p>We also run a randomized four-by-four-by-five factorial study: four workloads, rates from 10 to 120 captures per minute, and five repetitions, for 80 runs. Every run ends with a forced changed-state capture so endpoint accuracy can be tested separately from intermediate sampling density.</p>
+          <p>We evaluate four controlled Unity workloads totaling 126 seconds. Short Sparse isolates brief motion and unchanged windows. Medium Staggered alternates single and paired motion. Long Complex extends that pattern, while Original Choreography keeps every object active and produces the densest history.</p>
+          <p>We then run a randomized four-by-four-by-five factorial study: four workloads, rates from 10 to 120 captures per minute, and five repetitions, for 80 runs. A final changed-state capture lets us test endpoint accuracy separately from intermediate sampling density.</p>
         </aside>
       </section>
 
-      <section id="slide-9" class="slide" data-title="Reconstruction and latency" data-duration="0:45">
+      <section id="slide-9" class="slide slide-experiment" data-title="Unity experiment harness" data-duration="0:25">
         <div class="slide-heading compact">
-          <p class="eyebrow">08 · Reliability</p>
+          <p class="eyebrow">08 · In-engine study</p>
+          <h2>The factorial study runs inside the same Unity scene</h2>
+        </div>
+        <div class="experiment-setup-grid">
+          <figure class="experiment-shot">
+            <img src="./assets/unity-scene-baseline.png" alt="Controlled Unity scene before the factorial experiment begins" data-zoom />
+            <figcaption><strong>Controlled scene</strong><span>Shared geometry and starting state</span></figcaption>
+          </figure>
+          <figure class="experiment-shot">
+            <img src="./assets/unity-experiment-ready.png" alt="Unity factorial experiment interface ready to run 80 trials" data-zoom />
+            <figcaption><strong>Experiment ready</strong><span>4 workloads × 4 rates × 5 repetitions</span></figcaption>
+          </figure>
+        </div>
+        <div class="experiment-fact-strip">
+          <span><b>F</b> starts the randomized study</span>
+          <span><b>Q</b> cancels after the current frame</span>
+          <span><b>Seed 20260615</b> makes the run order repeatable</span>
+        </div>
+        <aside class="speaker-notes">
+          <p>The factorial study runs directly in Unity. The controlled scene provides the common starting geometry, while the in-engine controller configures four workloads, four capture rates, and five repetitions.</p>
+          <p>A fixed seed makes the randomized run order repeatable, and every session writes to a dedicated output directory for later materialization and analysis.</p>
+        </aside>
+      </section>
+
+      <section id="slide-10" class="slide slide-experiment" data-title="Factorial run in motion" data-duration="0:25">
+        <div class="slide-heading compact">
+          <p class="eyebrow">09 · Live execution</p>
+          <h2>Every run exposes its workload, rate, and progress</h2>
+        </div>
+        <div class="experiment-run-grid">
+          <figure class="experiment-shot">
+            <img src="./assets/unity-experiment-120cpm.png" alt="MediumStaggered workload running at 120 captures per minute in Unity" data-zoom />
+            <figcaption><strong>run_002 · MediumStaggered</strong><span>120 CPM</span></figcaption>
+          </figure>
+          <figure class="experiment-shot">
+            <img src="./assets/unity-experiment-30cpm.png" alt="MediumStaggered workload running at 30 captures per minute in Unity" data-zoom />
+            <figcaption><strong>run_003 · MediumStaggered</strong><span>30 CPM</span></figcaption>
+          </figure>
+        </div>
+        <div class="experiment-observation">
+          <strong>Same scene and motion program.</strong>
+          <span>Only the observation rate changes, so temporal coverage can be compared without changing the endpoint task.</span>
+        </div>
+        <aside class="speaker-notes">
+          <p>During execution, the overlay reports progress, run identifier, workload, capture rate, seed, and output path. These examples show the same Medium Staggered workload at 120 and 30 captures per minute.</p>
+          <p>The motion program and endpoint task stay fixed. Only the observation rate changes, isolating how sampling density affects the retained path.</p>
+        </aside>
+      </section>
+
+      <section id="slide-11" class="slide" data-title="Reconstruction and latency" data-duration="0:40">
+        <div class="slide-heading compact">
+          <p class="eyebrow">10 · Reliability</p>
           <h2>Every controlled history reaches the correct final graph</h2>
         </div>
         <div class="result-hero">
@@ -315,9 +366,9 @@
         </aside>
       </section>
 
-      <section id="slide-10" class="slide" data-title="Storage trade-off" data-duration="1:00">
+      <section id="slide-12" class="slide" data-title="Storage trade-off" data-duration="0:50">
         <div class="slide-heading compact">
-          <p class="eyebrow">09 · Storage</p>
+          <p class="eyebrow">11 · Storage</p>
           <h2>Incremental history is compact only when change is sparse</h2>
         </div>
         <div class="storage-layout">
@@ -344,9 +395,9 @@
         </aside>
       </section>
 
-      <section id="slide-11" class="slide" data-title="Capture-rate trade-off" data-duration="1:00">
+      <section id="slide-13" class="slide" data-title="Capture-rate trade-off" data-duration="0:50">
         <div class="slide-heading compact">
-          <p class="eyebrow">10 · Sensitivity</p>
+          <p class="eyebrow">12 · Sensitivity</p>
           <h2>Higher capture rates preserve more of the path, not a better endpoint</h2>
         </div>
         <div class="cpm-layout">
@@ -383,10 +434,10 @@
         </aside>
       </section>
 
-      <section id="slide-12" class="slide slide-closing" data-title="Takeaway" data-duration="1:10">
+      <section id="slide-14" class="slide slide-closing" data-title="Takeaway" data-duration="1:00">
         <div class="closing-grid">
           <div class="closing-main">
-            <p class="eyebrow">11 · Takeaway</p>
+            <p class="eyebrow">13 · Takeaway</p>
             <h2>Incremental history is a practical interface — and a conditional storage win.</h2>
             <p class="closing-thesis">Preserve accepted transitions when change is sparse. Switch strategy when the scene becomes dense.</p>
             <div class="closing-actions">
@@ -421,7 +472,7 @@
     <nav id="slideRail" class="slide-rail" aria-label="Slide navigation"></nav>
 
     <footer class="deck-footer">
-      <div id="slideCounter" class="slide-counter">01 / 12</div>
+      <div id="slideCounter" class="slide-counter">01 / 14</div>
       <div id="slideMeta" class="slide-meta">Opening · 0:30</div>
       <div class="nav-buttons">
         <button id="prevButton" class="icon-button" type="button" title="Previous slide" aria-label="Previous slide">‹</button>
