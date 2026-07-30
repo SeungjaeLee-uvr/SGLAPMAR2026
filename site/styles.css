@@ -2852,3 +2852,44 @@ body:has(.slide-hero.is-active) .deck-footer {
     padding: 16px 22px;
   }
 }
+
+.hero-logos {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.hero-logos img {
+  display: block;
+  width: auto;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.hero-logos .kaist-logo {
+  height: 34px;
+}
+
+.hero-logos .uvr-logo {
+  height: 48px;
+  padding-left: 22px;
+  border-left: 1px solid rgba(31, 43, 224, 0.35);
+}
+
+@media (min-width: 1600px) and (min-height: 900px) {
+  .hero-logos {
+    gap: 26px;
+    margin-top: 26px;
+  }
+
+  .hero-logos .kaist-logo {
+    height: 42px;
+  }
+
+  .hero-logos .uvr-logo {
+    height: 58px;
+    padding-left: 26px;
+  }
+}
