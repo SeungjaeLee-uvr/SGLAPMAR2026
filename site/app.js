@@ -1,7 +1,6 @@
 const slides = Array.from(document.querySelectorAll(".slide"));
 const rail = document.getElementById("slideRail");
 const counter = document.getElementById("slideCounter");
-const meta = document.getElementById("slideMeta");
 const progressBar = document.getElementById("progressBar");
 const prevButton = document.getElementById("prevButton");
 const nextButton = document.getElementById("nextButton");
@@ -48,7 +47,6 @@ function setSlide(index, options = {}) {
 
   const slide = slides[currentIndex];
   counter.textContent = `${twoDigits(currentIndex + 1)} / ${twoDigits(slides.length)}`;
-  meta.textContent = `${slide.dataset.title} · ${slide.dataset.duration}`;
   progressBar.style.width = `${((currentIndex + 1) / slides.length) * 100}%`;
   prevButton.disabled = currentIndex === 0;
   nextButton.disabled = currentIndex === slides.length - 1;

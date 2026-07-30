@@ -1326,7 +1326,7 @@ code {
   right: 28px;
   bottom: 18px;
   display: grid;
-  grid-template-columns: 90px 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 16px;
   pointer-events: none;
@@ -1341,12 +1341,6 @@ code {
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
   font-weight: 800;
-}
-
-.slide-meta {
-  justify-self: center;
-  color: var(--muted);
-  font-size: 0.82rem;
 }
 
 .nav-buttons {
@@ -1811,14 +1805,7 @@ dialog::backdrop {
     left: 14px;
     right: 14px;
     bottom: 12px;
-    grid-template-columns: 64px 1fr auto;
-  }
-
-  .slide-meta {
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    grid-template-columns: 1fr auto;
   }
 
   .overview-grid {
@@ -2154,8 +2141,7 @@ body:has(.slide-hero.is-active) .deck-footer {
 
 .figure-frame figcaption,
 .hero-plate figcaption,
-.slide-counter,
-.slide-meta {
+.slide-counter {
   font-family: "DM Mono", ui-monospace, monospace;
 }
 
@@ -2435,8 +2421,7 @@ body:has(.slide-hero.is-active) .deck-footer {
   backdrop-filter: none;
 }
 
-.slide-counter,
-.slide-meta {
+.slide-counter {
   color: var(--ink);
   font-size: 0.72rem;
   letter-spacing: 0.04em;
