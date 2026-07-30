@@ -1,90 +1,90 @@
-# 10-Minute Presentation Script
+10-MINUTE PRESENTATION SCRIPT
 
-## Slide 1 - Opening (0:30)
+SLIDE 1 - OPENING (0:30)
 
 Good morning. I am Seungjae Lee from KAIST UVR Lab. In real-time AR and VR, we often maintain a scene graph for what exists now. My question is: how can we preserve what changed over time without saving every complete graph?
 
 We address this with an incremental snapshot manager that records accepted transitions and reconstructs scene history offline.
 
-## Slide 2 - The Missing History (0:50)
+SLIDE 2 - THE MISSING HISTORY (0:50)
 
 Scene graphs represent objects, anchors, zones, users, and their relations. The latest graph is enough for rendering, but it cannot answer temporal questions: What did the scene look like? Which transition came first? When did a relation appear?
 
 Saving every full graph preserves access, but duplicates mostly unchanged content and leaves each application to rediscover the transitions. So our goal is not simply to archive states. It is to preserve explicit changes once, then reuse them for restoration, replay, comparison, debugging, and query.
 
-## Slide 3 - System Boundary (0:50)
+SLIDE 3 - SYSTEM BOUNDARY (0:50)
 
 Our system sits after scene understanding. It does not track objects, build maps, or infer the graph. An upstream runtime, simulation, or authoring tool provides complete graph states.
 
 We rely on two assumptions. Node identities remain stable within a history, so motion becomes an update rather than a remove-and-add pair. Edge identity is determined by its source, relation type, and target. Given this narrow interface, snapshot management can evolve independently from both scene production and downstream temporal applications.
 
-## Slide 4 - Online and Offline Paths (0:50)
+SLIDE 4 - ONLINE AND OFFLINE PATHS (0:50)
 
 The architecture separates real-time capture from offline reconstruction. Online, Unity extracts a complete graph, canonicalizes it, and compares its signature with the last accepted state. An unchanged attempt is discarded. When change is detected, the recorder computes sparse node and edge operations and appends them to JSON Lines.
 
 Offline, a Python materializer validates sequence order, groups records by accepted snapshot boundary, and applies them from the external initial scene. It then exports replay, aggregate-comparison, and final-state results. The expensive history work therefore stays outside the Unity main loop.
 
-## Slide 5 - Incremental Transition Model (0:45)
+SLIDE 5 - INCREMENTAL TRANSITION MODEL (0:45)
 
 Here is the representation. The external initial scene is G-zero. Each accepted transition, T-one, T-two, and so on, contains one or more operations that produce the next graph state.
 
 The prototype supports adding, updating, and removing nodes, plus adding and removing edges. Node updates are sparse patches: fields that are absent remain unchanged. Records from one capture share a snapshot identifier and timestamp. The important point is that a JSONL line is an operation, not a state. The complete group defines the accepted transition.
 
-## Slide 6 - Unity Snapshot Recorder (0:50)
+SLIDE 6 - UNITY SNAPSHOT RECORDER (0:50)
 
 In Unity, each capture attempt follows three bounded steps. First, SceneGraphExtractor reads stable identities, transforms, and relations. Second, sorted node properties and edge identities form a deterministic signature. If it matches the last accepted signature, the attempt ends immediately.
 
 Otherwise, the recorder diffs the complete graph against the previous accepted graph and appends the resulting operations. Only after those records are complete does it advance the accepted boundary. Therefore, the configured capture rate is a maximum observation rate. It does not mean that every attempt becomes part of the history.
 
-## Slide 7 - Durable Log and Materializer (0:40)
+SLIDE 7 - DURABLE LOG AND MATERIALIZER (0:40)
 
 The log is append-only JSONL, with one completed operation per line. This makes the recording durable during production: after an interruption, the materializer can ignore an incomplete final record and keep the valid prefix.
 
 Offline, it checks order, groups operations, applies sparse patches, and exports playback, aggregate-difference, and final-scene documents. Unity can replay those transitions as GameObject updates, while non-Unity tools can consume the same explicit history.
 
-## Slide 8 - Evaluation Design (0:30)
+SLIDE 8 - EVALUATION DESIGN (0:30)
 
 We evaluate four Unity workloads with different temporal patterns: three sparse or staggered workloads, and one continuously active choreography.
 
 We combine these with four capture rates - 10, 30, 60, and 120 captures per minute - and five repetitions. This gives 80 randomized runs. A final changed-state capture separates endpoint correctness from the amount of intermediate motion retained.
 
-## Slide 9 - Unity Experiment Harness (0:25)
+SLIDE 9 - UNITY EXPERIMENT HARNESS (0:25)
 
 The experiment runs inside the same controlled Unity scene shown here. Each run begins from the same seven-node state.
 
 A fixed seed makes the randomized order reproducible, and every session receives its own output directory. This keeps the workload, capture rate, repetition, and generated history traceable during later analysis.
 
-## Slide 10 - Factorial Run in Motion (0:25)
+SLIDE 10 - FACTORIAL RUN IN MOTION (0:25)
 
 During a run, the overlay reports the workload, capture rate, seed, progress, and output path. These screenshots show the same Medium Staggered motion at 120 and 30 captures per minute.
 
 The motion program and endpoint remain fixed; only the observation rate changes. That isolates how sampling density changes the retained path.
 
-## Slide 11 - Reconstruction and Latency (0:40)
+SLIDE 11 - RECONSTRUCTION AND LATENCY (0:40)
 
 First, reconstruction is internally consistent. Across 67 nominal observation opportunities, the recorder accepts 61 transition groups, skips six unchanged opportunities, and stores 155 operations.
 
 The materializer reconstructs all four final scenes, and all 13 regression tests pass. Mean end-to-end restore remains below 7.2 milliseconds for these small histories. I interpret this as prototype consistency across filtering, grouping, reconstruction, and replay - not as evidence of large-scale deployment performance.
 
-## Slide 12 - Storage Trade-off (0:45)
+SLIDE 12 - STORAGE TRADE-OFF (0:45)
 
 Storage is where the result becomes conditional. For the three sparse workloads, the incremental log is 0.46 to 0.67 times the size of compact reconstructed full states. Aggregated across all workloads, the ratio is 0.86. But the continuously changing choreography reaches 1.68.
 
 Readable JSON operations repeatedly carry sequence metadata, identifiers, timestamps, operation names, and field names. Sparse change amortizes this overhead; dense change does not. Dynamic scenes may therefore need periodic checkpoints, grouped records, or binary encoding.
 
-## Slide 13 - Capture-Rate Trade-off (0:45)
+SLIDE 13 - CAPTURE-RATE TRADE-OFF (0:45)
 
 Capture rate produces a different trade-off. From 10 to 120 captures per minute, accepted groups per run rise from 6.25 to 52.2, and mean log size rises from 12.8 to 85.3 kilobytes. Finer sampling also preserves more relation events.
 
 However, every one of the 80 runs recovers the same final graph, with zero position error and 100 percent final relation recall. In these controlled workloads, a higher rate improves temporal fidelity; it does not improve endpoint correctness.
 
-## Slide 14 - Discussion (0:30)
+SLIDE 14 - DISCUSSION (0:30)
 
 These results suggest three separate design decisions. Choose capture rate according to the temporal questions you need to answer. Choose encoding according to scene dynamics, because sparsity determines the storage benefit.
 
 And value the history interface separately from compression: explicit transitions still support replay, debugging, comparison, and query. The evidence remains bounded to controlled workloads, stable identities, one ordered writer, and small histories.
 
-## Slide 15 - Conclusion (0:45)
+SLIDE 15 - CONCLUSION (0:45)
 
 To conclude, this work adds a small temporal layer between scene production and later access. It filters unchanged attempts, records explicit node and edge operations, and reconstructs accepted histories for restore, replay, comparison, and query.
 

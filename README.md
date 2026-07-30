@@ -14,10 +14,11 @@ https://seungjaelee-uvr.github.io/SGLAPMAR2026/
 
 - `site/index.html`: 15-slide interactive presentation
 - `site/script.md`: complete 10-minute English narration
+- `site/script.txt`: plain-text version of the narration
 - `site/lsj_apmar.pdf`: paper PDF
 - `site/assets/`: selected figures used by the presentation
 
-The site supports keyboard and touch navigation, slide overview, speaker notes, image enlargement, and a ten-minute timer.
+The site supports keyboard and touch navigation, slide overview, speaker notes, image enlargement, and `F`-key fullscreen mode.
 
 GitHub Actions publishes the contents of `site/` to GitHub Pages whenever `main` changes.
 
