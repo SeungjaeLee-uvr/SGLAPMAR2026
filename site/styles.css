@@ -3032,3 +3032,283 @@ body:has(.slide-hero.is-active) .deck-footer {
     padding: 18px 24px;
   }
 }
+
+/* White presentation canvas */
+:root {
+  --ink: #182230;
+  --muted: #5f6b7a;
+  --line: #d7dde6;
+  --paper: #ffffff;
+  --paper-deep: #f3f5f8;
+  --white: #ffffff;
+  --blue: #155eef;
+  --blue-soft: #edf4ff;
+}
+
+body,
+.slide,
+.slide-hero,
+.slide-closing {
+  color: var(--ink);
+  background: #ffffff;
+}
+
+.deck::before,
+.deck::after {
+  display: none;
+}
+
+.progress-track {
+  background: #e8ecf2;
+}
+
+.progress-bar {
+  background: var(--blue);
+}
+
+h1,
+h2,
+h3,
+.hero-panel h1,
+.closing-footer strong,
+.result-hero strong,
+.large-number strong,
+.aggregate-ratio strong,
+.endpoint-panel > strong {
+  color: var(--ink);
+  font-family: "Hanken Grotesk", "Segoe UI", Arial, sans-serif;
+}
+
+h1,
+h2,
+.hero-panel h1 {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+h3,
+.closing-footer strong,
+.result-hero strong,
+.large-number strong,
+.aggregate-ratio strong,
+.endpoint-panel > strong {
+  font-weight: 600;
+}
+
+.eyebrow,
+.hero-panel .eyebrow,
+.closing-main .eyebrow {
+  color: var(--blue);
+}
+
+.subtitle,
+.lead,
+.author-block span,
+.scope-stage p,
+.prototype-step p,
+.result-explanation p,
+.endpoint-panel p,
+.closing-side p {
+  color: var(--muted);
+}
+
+.icon-button,
+body:has(.slide-hero.is-active) .deck-chrome .icon-button,
+body:has(.slide-hero.is-active) .deck-footer .icon-button {
+  border-color: #c9d1dc;
+  color: var(--ink);
+  background: #ffffff;
+}
+
+.icon-button:hover,
+.icon-button:focus-visible {
+  border-color: var(--blue);
+  color: #ffffff;
+  background: var(--blue);
+}
+
+.hero-plate {
+  border-color: #c9d1dc;
+  background: #ffffff;
+}
+
+.hero-plate::before {
+  display: none;
+}
+
+.author-block {
+  border-top-color: #c9d1dc;
+  color: var(--ink);
+}
+
+.hero-logos .uvr-logo {
+  border-left-color: #c9d1dc;
+}
+
+.slide-heading {
+  border-bottom-color: #c9d1dc;
+}
+
+.question-stack > div,
+.scope-stage,
+.architecture-figure,
+.transition-figure,
+.prototype-step,
+.large-number,
+.factorial,
+.result-hero > div,
+.accuracy-band > div,
+.cpm-chart,
+.endpoint-panel,
+.closing-side,
+.overview-grid button,
+.experiment-shot,
+.discussion-point {
+  border-color: #c9d1dc;
+  color: var(--ink);
+  background: #ffffff;
+}
+
+.scope-stage.proposed,
+.scope-stage.downstream,
+.result-hero > .success-result,
+.workload-row.dense,
+.endpoint-panel,
+.result-conclusion,
+.log-step pre,
+.python-step .file-stack code,
+.signature-compare code {
+  background: var(--paper-deep);
+}
+
+.boundary-band,
+.architecture-caption,
+.operation-legend,
+.statement-band,
+.acceptance-strip,
+.reliability-strip,
+.accuracy-band,
+.result-explanation,
+.density-rule,
+.closing-actions {
+  border-color: #c9d1dc;
+  background: #ffffff;
+}
+
+.workload-table,
+.workload-row,
+.bar-row,
+.rate-row,
+.architecture-caption > div,
+.operation-legend > div,
+.boundary-band > div {
+  border-color: var(--line);
+}
+
+.slide-closing,
+.closing-main h2,
+.closing-thesis,
+.closing-side,
+.closing-side h3,
+.closing-side p,
+.closing-side li,
+.closing-footer {
+  color: var(--ink);
+}
+
+.discussion-boundary {
+  border-color: var(--ink);
+  color: #ffffff;
+  background: var(--ink);
+}
+
+.discussion-boundary span {
+  border-right-color: rgba(255, 255, 255, 0.28);
+}
+
+.slide-rail button {
+  border-color: #aeb8c5;
+  background: #ffffff;
+}
+
+.slide-rail button.is-active {
+  border-color: var(--blue);
+  background: var(--blue);
+}
+
+.deck-footer,
+body:has(.slide-hero.is-active) .deck-footer,
+.slide-counter {
+  color: var(--muted);
+  background: transparent;
+}
+
+.notes-drawer,
+.overview-dialog,
+.image-dialog {
+  border-color: #c9d1dc;
+  color: var(--ink);
+  background: #ffffff;
+}
+
+@media (min-width: 1101px) {
+  .slide:not(.slide-hero):not(.slide-closing) {
+    align-content: start;
+    gap: 24px;
+  }
+
+  #slide-4,
+  #slide-5,
+  #slide-8,
+  #slide-13 {
+    gap: 24px;
+    padding-top: 74px;
+  }
+
+  .slide:not(.slide-hero):not(.slide-closing) .slide-heading {
+    display: flex;
+    height: 176px;
+    min-height: 176px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-bottom: 18px;
+  }
+
+  .slide:not(.slide-hero):not(.slide-closing) .slide-heading h2 {
+    font-size: 2.7rem;
+    line-height: 1.08;
+  }
+
+  .slide:not(.slide-hero):not(.slide-closing) .slide-heading .subtitle {
+    margin-top: 10px;
+  }
+}
+
+@media (min-width: 1600px) and (min-height: 900px) {
+  .slide:not(.slide-hero):not(.slide-closing) {
+    gap: 28px;
+    padding-top: 78px;
+    padding-bottom: 92px;
+  }
+
+  #slide-4,
+  #slide-5,
+  #slide-8,
+  #slide-13 {
+    gap: 28px;
+    padding-top: 78px;
+    padding-bottom: 92px;
+  }
+
+  .slide:not(.slide-hero):not(.slide-closing) .slide-heading {
+    height: 188px;
+    min-height: 188px;
+    padding-bottom: 22px;
+  }
+
+  .slide:not(.slide-hero):not(.slide-closing) .slide-heading h2,
+  .slide:not(.slide-hero):not(.slide-closing) .slide-heading.compact h2 {
+    font-size: 3rem;
+  }
+}
