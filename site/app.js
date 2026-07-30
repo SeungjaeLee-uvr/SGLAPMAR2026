@@ -117,6 +117,14 @@ imageDialog.addEventListener("click", (event) => {
   }
 });
 
+async function toggleFullscreen() {
+  if (document.fullscreenElement) {
+    await document.exitFullscreen();
+  } else {
+    await document.documentElement.requestFullscreen();
+  }
+}
+
 document.addEventListener("keydown", (event) => {
   if (event.target.matches("button, a, input, textarea") && event.key !== "Escape") {
     return;
@@ -137,6 +145,9 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key.toLowerCase() === "n") {
     event.preventDefault();
     toggleNotes();
+  } else if (event.key.toLowerCase() === "f") {
+    event.preventDefault();
+    void toggleFullscreen();
   } else if (event.key === "Escape") {
     closeNotes();
   }
