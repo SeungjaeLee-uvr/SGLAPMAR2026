@@ -2867,6 +2867,43 @@ body:has(.slide-hero.is-active) .deck-footer {
   border-left: 1px solid rgba(31, 43, 224, 0.35);
 }
 
+.closing-qr {
+  display: grid;
+  width: min(100%, 520px);
+  grid-template-columns: 174px minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  margin: 30px 0 0;
+}
+
+.closing-qr img {
+  display: block;
+  width: 174px;
+  height: 174px;
+  border: 1.5px solid var(--ink);
+  background: #ffffff;
+}
+
+.closing-qr figcaption {
+  display: grid;
+  gap: 8px;
+  color: var(--ink);
+}
+
+.closing-qr figcaption strong {
+  font-family: "Newsreader", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+}
+
+.closing-qr figcaption span {
+  max-width: 260px;
+  overflow-wrap: anywhere;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
 @media (min-width: 1600px) and (min-height: 900px) {
   .hero-logos {
     gap: 26px;
@@ -2880,5 +2917,20 @@ body:has(.slide-hero.is-active) .deck-footer {
   .hero-logos .uvr-logo {
     height: 58px;
     padding-left: 26px;
+  }
+
+  .closing-qr {
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 28px;
+    margin-top: 34px;
+  }
+
+  .closing-qr img {
+    width: 210px;
+    height: 210px;
+  }
+
+  .closing-qr figcaption strong {
+    font-size: 1.5rem;
   }
 }
