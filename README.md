@@ -12,7 +12,7 @@ https://seungjaelee-uvr.github.io/SGLAPMAR2026/
 
 ## Contents
 
-- `site/index.html`: 15-slide interactive presentation
+- `site/index.html`: 14-slide interactive presentation
 - `site/script.md`: complete 10-minute English narration
 - `site/script.txt`: plain-text version of the narration
 - `site/lsj_apmar.pdf`: paper PDF

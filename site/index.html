@@ -15,7 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css?v=20260730-8" />
+    <link rel="stylesheet" href="./styles.css?v=20260731-1" />
   </head>
   <body>
     <div class="progress-track" aria-hidden="true">
@@ -70,7 +70,7 @@
         </aside>
       </section>
 
-      <section id="slide-2" class="slide" data-title="The missing history" data-duration="0:50">
+      <section id="slide-2" class="slide" data-title="The missing history" data-duration="0:45">
         <div class="slide-heading">
           <p class="eyebrow">01 · Motivation</p>
           <h2>The latest graph is useful.<br />The missing history is the problem.</h2>
@@ -96,9 +96,44 @@
         </aside>
       </section>
 
-      <section id="slide-3" class="slide" data-title="System boundary" data-duration="0:50">
+      <section id="slide-3" class="slide" data-title="Related work" data-duration="0:50">
         <div class="slide-heading compact">
-          <p class="eyebrow">02 · Scope</p>
+          <p class="eyebrow">02 · Related work</p>
+          <h2>Prior work models change or consumes history.<br />We manage the layer between them.</h2>
+        </div>
+        <div class="related-grid">
+          <section class="related-column">
+            <span class="related-label">Build and model</span>
+            <h3>Scene graphs over time</h3>
+            <p>3DSSG, SceneGraphFusion, dynamic scene graphs, Action Genome, STTran, TEMPURA, and Khronos estimate, represent, or predict evolving spatial structure.</p>
+            <small>Construction and temporal modeling [1, 2, 11-18]</small>
+          </section>
+          <section class="related-column">
+            <span class="related-label">Use history</span>
+            <h3>XR replay and revision</h3>
+            <p>RealitySketch, RealityCrafter, Experience Graphs, SceneGit, and VRGit use recorded histories or user-defined revision boundaries for replay, authoring, comparison, and reuse.</p>
+            <small>Temporal applications and workflows [3-9]</small>
+          </section>
+          <section class="related-column related-gap">
+            <span class="related-label">This work</span>
+            <h3>Capture accepted runtime change</h3>
+            <p>We preserve the lower-level ordered snapshot history before commits, branches, or editing milestones are defined, using an append-friendly transition log.</p>
+            <small>Snapshot management after graph production</small>
+          </section>
+        </div>
+        <div class="related-takeaway">
+          <span>Research gap</span>
+          <strong>Turn complete runtime graph states into one durable, reusable transition history.</strong>
+        </div>
+        <aside class="speaker-notes">
+          <p>Related work addresses both sides of this problem. Systems such as 3DSSG, SceneGraphFusion, dynamic scene graphs, and temporal scene-graph models explain how spatial structure is constructed or evolves over time.</p>
+          <p>XR authoring and replay systems, including Experience Graphs, SceneGit, and VRGit, show why history matters for playback, comparison, and revision. Our work sits between these lines: after a runtime produces complete graphs, but before an application defines commits or replay interfaces. We preserve the lower-level ordered transition history they can reuse.</p>
+        </aside>
+      </section>
+
+      <section id="slide-4" class="slide" data-title="System boundary" data-duration="0:45">
+        <div class="slide-heading compact">
+          <p class="eyebrow">03 · Scope</p>
           <h2>A narrow layer after scene understanding</h2>
           <p class="subtitle">The manager consumes complete, renderer-independent graphs with stable identities.</p>
         </div>
@@ -145,25 +180,46 @@
         </aside>
       </section>
 
-      <section id="slide-4" class="slide" data-title="Online and offline paths" data-duration="0:50">
+      <section id="slide-5" class="slide" data-title="System pipeline" data-duration="1:20">
         <div class="slide-heading compact">
-          <p class="eyebrow">03 · Architecture</p>
-          <h2>Bounded online work. Heavy temporal work offline.</h2>
+          <p class="eyebrow">04 · Proposed system</p>
+          <h2>Accept change online. Reconstruct history offline.</h2>
         </div>
-        <figure class="paper-figure architecture-figure">
-          <img src="./assets/architecture.png" alt="Online and offline architecture of the temporal scene manager" data-zoom />
-        </figure>
-        <div class="architecture-caption">
-          <div><strong class="accent-green">Online</strong><span>Filter unchanged states, compute node and edge differences, append JSONL.</span></div>
-          <div><strong class="accent-blue">Offline</strong><span>Validate order, group records, reconstruct states, produce temporal outputs.</span></div>
+        <div class="unified-system-layout">
+          <figure class="paper-figure unified-architecture">
+            <img src="./assets/architecture.png" alt="Online and offline architecture of the temporal scene manager" data-zoom />
+          </figure>
+          <div class="system-phase-list">
+            <section>
+              <span>1 · Capture and filter</span>
+              <h3>Complete graph → signature</h3>
+              <p>Unity extracts stable nodes, transforms, and relations. A matching canonical signature is skipped.</p>
+            </section>
+            <section>
+              <span>2 · Accept a transition</span>
+              <h3>Changed graph → sparse operations</h3>
+              <p>Node and edge differences are grouped by one <code>snapshot_id</code> and appended only after completion.</p>
+            </section>
+            <section>
+              <span>3 · Materialize offline</span>
+              <h3>Initial scene + JSONL → history</h3>
+              <p>Python validates order, applies accepted groups, and exports restore, replay, comparison, and query products.</p>
+            </section>
+          </div>
+        </div>
+        <div class="system-rule-band">
+          <strong>One line is an operation.</strong>
+          <span>One accepted group is a transition.</span>
+          <span>Capture rate is a maximum observation rate, not a promise to store every attempt.</span>
         </div>
         <aside class="speaker-notes">
-          <p>The architecture separates real-time capture from offline reconstruction. Online, Unity extracts a complete graph, canonicalizes it, and compares its signature with the last accepted state. An unchanged attempt is discarded. When change is detected, the recorder computes sparse node and edge operations and appends them to JSON Lines.</p>
-          <p>Offline, a Python materializer validates sequence order, groups records by accepted snapshot boundary, and applies them from the external initial scene. It then exports replay, aggregate-comparison, and final-state results. The expensive history work therefore stays outside the Unity main loop.</p>
+          <p>The complete system has one online path and one offline path. In Unity, each capture attempt begins with a complete graph. Stable node properties and edge identities form a deterministic signature. If that signature matches the last accepted graph, the attempt is skipped.</p>
+          <p>When the graph changes, the recorder computes sparse node and edge operations against the previous accepted state. Records from the same capture share a snapshot identifier, and the accepted boundary advances only after those operations are appended to JSON Lines.</p>
+          <p>Offline, Python validates order, groups operations, and applies them from the external initial scene. This distinction is central: one log line is an operation, while one completed group is the transition that produces the next state. Heavy reconstruction and derived outputs stay outside the Unity main loop.</p>
         </aside>
       </section>
 
-      <section id="slide-5" class="slide" data-title="Incremental transition model" data-duration="0:45">
+      <section id="retired-transition-model" class="retired-slide" hidden aria-hidden="true">
         <div class="slide-heading compact">
           <p class="eyebrow">04 · Representation</p>
           <h2>A log line is an operation. A group is a transition.</h2>
@@ -187,7 +243,7 @@
         </aside>
       </section>
 
-      <section id="slide-6" class="slide" data-title="Unity snapshot recorder" data-duration="0:50">
+      <section id="retired-unity-recorder" class="retired-slide" hidden aria-hidden="true">
         <div class="slide-heading compact">
           <p class="eyebrow">05 · Online prototype</p>
           <h2>Unity accepts change, not every capture attempt</h2>
@@ -223,9 +279,9 @@
         </aside>
       </section>
 
-      <section id="slide-7" class="slide" data-title="Durable log and materializer" data-duration="0:40">
+      <section id="slide-6" class="slide" data-title="Durable log and materializer" data-duration="0:45">
         <div class="slide-heading compact">
-          <p class="eyebrow">06 · Offline prototype</p>
+          <p class="eyebrow">05 · Offline prototype</p>
           <h2>Append first. Reconstruct and replay later.</h2>
         </div>
         <div class="prototype-grid two-up">
@@ -263,9 +319,9 @@
         </aside>
       </section>
 
-      <section id="slide-8" class="slide" data-title="Evaluation design" data-duration="0:30">
+      <section id="slide-7" class="slide" data-title="Evaluation design" data-duration="0:35">
         <div class="slide-heading compact">
-          <p class="eyebrow">07 · Study design</p>
+          <p class="eyebrow">06 · Study design</p>
           <h2>Four temporal patterns, then four capture rates</h2>
         </div>
         <div class="study-layout">
@@ -295,9 +351,9 @@
         </aside>
       </section>
 
-      <section id="slide-9" class="slide slide-experiment" data-title="Unity experiment harness" data-duration="0:25">
+      <section id="slide-8" class="slide slide-experiment" data-title="Unity experiment harness" data-duration="0:30">
         <div class="slide-heading compact">
-          <p class="eyebrow">08 · In-engine study</p>
+          <p class="eyebrow">07 · In-engine study</p>
           <h2>The factorial study runs inside the same Unity scene</h2>
         </div>
         <div class="experiment-setup-grid">
@@ -321,9 +377,9 @@
         </aside>
       </section>
 
-      <section id="slide-10" class="slide slide-experiment" data-title="Factorial run in motion" data-duration="0:25">
+      <section id="slide-9" class="slide slide-experiment" data-title="Factorial run in motion" data-duration="0:25">
         <div class="slide-heading compact">
-          <p class="eyebrow">09 · Live execution</p>
+          <p class="eyebrow">08 · Live execution</p>
           <h2>Every run exposes its workload, rate, and progress</h2>
         </div>
         <div class="experiment-run-grid">
@@ -346,9 +402,9 @@
         </aside>
       </section>
 
-      <section id="slide-11" class="slide" data-title="Reconstruction and latency" data-duration="0:40">
+      <section id="slide-10" class="slide" data-title="Reconstruction and latency" data-duration="0:45">
         <div class="slide-heading compact">
-          <p class="eyebrow">10 · Reliability</p>
+          <p class="eyebrow">09 · Reliability</p>
           <h2>Every controlled history reaches the correct final graph</h2>
         </div>
         <div class="result-hero">
@@ -369,9 +425,9 @@
         </aside>
       </section>
 
-      <section id="slide-12" class="slide" data-title="Storage trade-off" data-duration="0:45">
+      <section id="slide-11" class="slide" data-title="Storage trade-off" data-duration="0:50">
         <div class="slide-heading compact">
-          <p class="eyebrow">11 · Storage</p>
+          <p class="eyebrow">10 · Storage</p>
           <h2>Incremental history is compact only when change is sparse</h2>
         </div>
         <div class="storage-layout">
@@ -398,9 +454,9 @@
         </aside>
       </section>
 
-      <section id="slide-13" class="slide" data-title="Capture-rate trade-off" data-duration="0:45">
+      <section id="slide-12" class="slide" data-title="Capture-rate trade-off" data-duration="0:50">
         <div class="slide-heading compact">
-          <p class="eyebrow">12 · Sensitivity</p>
+          <p class="eyebrow">11 · Sensitivity</p>
           <h2>Higher capture rates preserve more of the path, not a better endpoint</h2>
         </div>
         <div class="cpm-layout">
@@ -437,9 +493,9 @@
         </aside>
       </section>
 
-      <section id="slide-14" class="slide" data-title="Discussion" data-duration="0:30">
+      <section id="slide-13" class="slide" data-title="Discussion" data-duration="0:35">
         <div class="slide-heading compact">
-          <p class="eyebrow">13 · Discussion</p>
+          <p class="eyebrow">12 · Discussion</p>
           <h2>The right history strategy depends on the questions and the scene</h2>
         </div>
         <div class="discussion-grid">
@@ -469,10 +525,10 @@
         </aside>
       </section>
 
-      <section id="slide-15" class="slide slide-closing" data-title="Conclusion" data-duration="0:45">
+      <section id="slide-14" class="slide slide-closing" data-title="Conclusion" data-duration="0:35">
         <div class="closing-grid">
           <div class="closing-main">
-            <p class="eyebrow">14 · Conclusion</p>
+              <p class="eyebrow">13 · Conclusion</p>
             <h2>
               <span>Incremental history is a</span>
               <span>practical interface.</span>
@@ -503,9 +559,8 @@
           <strong>Questions?</strong>
         </div>
         <aside class="speaker-notes">
-          <p>To conclude, this work adds a small temporal layer between scene production and later access. It filters unchanged attempts, records explicit node and edge operations, and reconstructs accepted histories for restore, replay, comparison, and query.</p>
-          <p>The main lesson is conditional: incremental history is practical and compact when change is sparse, while dense scenes may need checkpoints or more efficient encodings. We do not make the final scene graph smarter; we make its history available.</p>
-          <p>Thank you. I welcome your questions.</p>
+          <p>To conclude, this work adds a small temporal layer between scene production and later access. It filters unchanged attempts, records explicit operations, and reconstructs accepted histories for replay and query.</p>
+          <p>The lesson is conditional: incremental history is compact when change is sparse, while dense scenes may need checkpoints or efficient encodings. We do not make the final graph smarter; we make its history available. Thank you.</p>
         </aside>
       </section>
     </main>

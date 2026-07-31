@@ -6,88 +6,82 @@ Good morning. I am Seungjae Lee from KAIST UVR Lab. In real-time AR and VR, we o
 
 We address this with an incremental snapshot manager that records accepted transitions and reconstructs scene history offline.
 
-## Slide 2 - The Missing History (0:50)
+## Slide 2 - The Missing History (0:45)
 
 Scene graphs represent objects, anchors, zones, users, and their relations. The latest graph is enough for rendering, but it cannot answer temporal questions: What did the scene look like? Which transition came first? When did a relation appear?
 
 Saving every full graph preserves access, but duplicates mostly unchanged content and leaves each application to rediscover the transitions. So our goal is not simply to archive states. It is to preserve explicit changes once, then reuse them for restoration, replay, comparison, debugging, and query.
 
-## Slide 3 - System Boundary (0:50)
+## Slide 3 - Related Work (0:50)
+
+Related work addresses both sides of this problem. Systems such as 3DSSG, SceneGraphFusion, dynamic scene graphs, and temporal scene-graph models explain how spatial structure is constructed or evolves over time.
+
+XR authoring and replay systems, including Experience Graphs, SceneGit, and VRGit, show why history matters for playback, comparison, and revision. Our work sits between these lines: after a runtime produces complete graphs, but before an application defines commits or replay interfaces. We preserve the lower-level ordered transition history they can reuse.
+
+## Slide 4 - System Boundary (0:45)
 
 Our system sits after scene understanding. It does not track objects, build maps, or infer the graph. An upstream runtime, simulation, or authoring tool provides complete graph states.
 
 We rely on two assumptions. Node identities remain stable within a history, so motion becomes an update rather than a remove-and-add pair. Edge identity is determined by its source, relation type, and target. Given this narrow interface, snapshot management can evolve independently from both scene production and downstream temporal applications.
 
-## Slide 4 - Online and Offline Paths (0:50)
+## Slide 5 - System Pipeline (1:20)
 
-The architecture separates real-time capture from offline reconstruction. Online, Unity extracts a complete graph, canonicalizes it, and compares its signature with the last accepted state. An unchanged attempt is discarded. When change is detected, the recorder computes sparse node and edge operations and appends them to JSON Lines.
+The complete system has one online path and one offline path. In Unity, each capture attempt begins with a complete graph. Stable node properties and edge identities form a deterministic signature. If that signature matches the last accepted graph, the attempt is skipped.
 
-Offline, a Python materializer validates sequence order, groups records by accepted snapshot boundary, and applies them from the external initial scene. It then exports replay, aggregate-comparison, and final-state results. The expensive history work therefore stays outside the Unity main loop.
+When the graph changes, the recorder computes sparse node and edge operations against the previous accepted state. Records from the same capture share a snapshot identifier, and the accepted boundary advances only after those operations are appended to JSON Lines.
 
-## Slide 5 - Incremental Transition Model (0:45)
+Offline, Python validates order, groups operations, and applies them from the external initial scene. This distinction is central: one log line is an operation, while one completed group is the transition that produces the next state. Heavy reconstruction and derived outputs stay outside the Unity main loop.
 
-Here is the representation. The external initial scene is G-zero. Each accepted transition, T-one, T-two, and so on, contains one or more operations that produce the next graph state.
-
-The prototype supports adding, updating, and removing nodes, plus adding and removing edges. Node updates are sparse patches: fields that are absent remain unchanged. Records from one capture share a snapshot identifier and timestamp. The important point is that a JSONL line is an operation, not a state. The complete group defines the accepted transition.
-
-## Slide 6 - Unity Snapshot Recorder (0:50)
-
-In Unity, each capture attempt follows three bounded steps. First, SceneGraphExtractor reads stable identities, transforms, and relations. Second, sorted node properties and edge identities form a deterministic signature. If it matches the last accepted signature, the attempt ends immediately.
-
-Otherwise, the recorder diffs the complete graph against the previous accepted graph and appends the resulting operations. Only after those records are complete does it advance the accepted boundary. Therefore, the configured capture rate is a maximum observation rate. It does not mean that every attempt becomes part of the history.
-
-## Slide 7 - Durable Log and Materializer (0:40)
+## Slide 6 - Durable Log and Materializer (0:45)
 
 The log is append-only JSONL, with one completed operation per line. This makes the recording durable during production: after an interruption, the materializer can ignore an incomplete final record and keep the valid prefix.
 
 Offline, it checks order, groups operations, applies sparse patches, and exports playback, aggregate-difference, and final-scene documents. Unity can replay those transitions as GameObject updates, while non-Unity tools can consume the same explicit history.
 
-## Slide 8 - Evaluation Design (0:30)
+## Slide 7 - Evaluation Design (0:35)
 
 We evaluate four Unity workloads with different temporal patterns: three sparse or staggered workloads, and one continuously active choreography.
 
 We combine these with four capture rates - 10, 30, 60, and 120 captures per minute - and five repetitions. This gives 80 randomized runs. A final changed-state capture separates endpoint correctness from the amount of intermediate motion retained.
 
-## Slide 9 - Unity Experiment Harness (0:25)
+## Slide 8 - Unity Experiment Harness (0:30)
 
 The experiment runs inside the same controlled Unity scene shown here. Each run begins from the same seven-node state.
 
 A fixed seed makes the randomized order reproducible, and every session receives its own output directory. This keeps the workload, capture rate, repetition, and generated history traceable during later analysis.
 
-## Slide 10 - Factorial Run in Motion (0:25)
+## Slide 9 - Factorial Run in Motion (0:25)
 
 During a run, the overlay reports the workload, capture rate, seed, progress, and output path. These screenshots show the same Medium Staggered motion at 120 and 30 captures per minute.
 
 The motion program and endpoint remain fixed; only the observation rate changes. That isolates how sampling density changes the retained path.
 
-## Slide 11 - Reconstruction and Latency (0:40)
+## Slide 10 - Reconstruction and Latency (0:45)
 
 First, reconstruction is internally consistent. Across 67 nominal observation opportunities, the recorder accepts 61 transition groups, skips six unchanged opportunities, and stores 155 operations.
 
 The materializer reconstructs all four final scenes, and all 13 regression tests pass. Mean end-to-end restore remains below 7.2 milliseconds for these small histories. I interpret this as prototype consistency across filtering, grouping, reconstruction, and replay - not as evidence of large-scale deployment performance.
 
-## Slide 12 - Storage Trade-off (0:45)
+## Slide 11 - Storage Trade-off (0:50)
 
 Storage is where the result becomes conditional. For the three sparse workloads, the incremental log is 0.46 to 0.67 times the size of compact reconstructed full states. Aggregated across all workloads, the ratio is 0.86. But the continuously changing choreography reaches 1.68.
 
 Readable JSON operations repeatedly carry sequence metadata, identifiers, timestamps, operation names, and field names. Sparse change amortizes this overhead; dense change does not. Dynamic scenes may therefore need periodic checkpoints, grouped records, or binary encoding.
 
-## Slide 13 - Capture-Rate Trade-off (0:45)
+## Slide 12 - Capture-Rate Trade-off (0:50)
 
 Capture rate produces a different trade-off. From 10 to 120 captures per minute, accepted groups per run rise from 6.25 to 52.2, and mean log size rises from 12.8 to 85.3 kilobytes. Finer sampling also preserves more relation events.
 
 However, every one of the 80 runs recovers the same final graph, with zero position error and 100 percent final relation recall. In these controlled workloads, a higher rate improves temporal fidelity; it does not improve endpoint correctness.
 
-## Slide 14 - Discussion (0:30)
+## Slide 13 - Discussion (0:35)
 
 These results suggest three separate design decisions. Choose capture rate according to the temporal questions you need to answer. Choose encoding according to scene dynamics, because sparsity determines the storage benefit.
 
 And value the history interface separately from compression: explicit transitions still support replay, debugging, comparison, and query. The evidence remains bounded to controlled workloads, stable identities, one ordered writer, and small histories.
 
-## Slide 15 - Conclusion (0:45)
+## Slide 14 - Conclusion (0:35)
 
-To conclude, this work adds a small temporal layer between scene production and later access. It filters unchanged attempts, records explicit node and edge operations, and reconstructs accepted histories for restore, replay, comparison, and query.
+To conclude, this work adds a small temporal layer between scene production and later access. It filters unchanged attempts, records explicit operations, and reconstructs accepted histories for replay and query.
 
-The main lesson is conditional: incremental history is practical and compact when change is sparse, while dense scenes may need checkpoints or more efficient encodings. We do not make the final scene graph smarter; we make its history available.
-
-Thank you. I welcome your questions.
+The lesson is conditional: incremental history is compact when change is sparse, while dense scenes may need checkpoints or efficient encodings. We do not make the final graph smarter; we make its history available. Thank you.
